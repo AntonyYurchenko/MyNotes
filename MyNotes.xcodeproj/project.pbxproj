@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A5A1C5A1E3E8A15001A28FC /* credentials.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A5A1C591E3E8A15001A28FC /* credentials.json */; };
 		0AB9B7BB1E028826006515E2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7BA1E028826006515E2 /* AppDelegate.swift */; };
 		0AB9B7BD1E028826006515E2 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7BC1E028826006515E2 /* NoteViewController.swift */; };
 		0AB9B7C01E028826006515E2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AB9B7BE1E028826006515E2 /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 		0AB9B7DB1E028ECB006515E2 /* NotesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DA1E028ECB006515E2 /* NotesTableViewController.swift */; };
 		0AB9B7DD1E028FE0006515E2 /* NoteTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DC1E028FE0006515E2 /* NoteTableViewCell.swift */; };
 		0AB9B7DF1E029214006515E2 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DE1E029214006515E2 /* Note.swift */; };
+		0ACC2CC11E1A890A0095E84C /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACC2CC01E1A890A0095E84C /* WebViewController.swift */; };
 		0AD767551E05C85E00B71829 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 0AD767541E05C85E00B71829 /* README.md */; };
 		0AD767571E05C95C00B71829 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 0AD767561E05C95C00B71829 /* .gitignore */; };
 /* End PBXBuildFile section */
@@ -31,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A5A1C591E3E8A15001A28FC /* credentials.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = credentials.json; sourceTree = "<group>"; };
 		0AB9B7B71E028826006515E2 /* MyNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AB9B7BA1E028826006515E2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0AB9B7BC1E028826006515E2 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
@@ -44,6 +47,7 @@
 		0AB9B7DA1E028ECB006515E2 /* NotesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotesTableViewController.swift; sourceTree = "<group>"; };
 		0AB9B7DC1E028FE0006515E2 /* NoteTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteTableViewCell.swift; sourceTree = "<group>"; };
 		0AB9B7DE1E029214006515E2 /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		0ACC2CC01E1A890A0095E84C /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		0AD767541E05C85E00B71829 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		0AD767561E05C95C00B71829 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -88,8 +92,10 @@
 		0AB9B7B91E028826006515E2 /* MyNotes */ = {
 			isa = PBXGroup;
 			children = (
+				0A5A1C591E3E8A15001A28FC /* credentials.json */,
 				0AB9B7BA1E028826006515E2 /* AppDelegate.swift */,
 				0AB9B7DA1E028ECB006515E2 /* NotesTableViewController.swift */,
+				0ACC2CC01E1A890A0095E84C /* WebViewController.swift */,
 				0AB9B7DC1E028FE0006515E2 /* NoteTableViewCell.swift */,
 				0AB9B7BC1E028826006515E2 /* NoteViewController.swift */,
 				0AB9B7DE1E029214006515E2 /* Note.swift */,
@@ -195,6 +201,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A5A1C5A1E3E8A15001A28FC /* credentials.json in Resources */,
 				0AD767571E05C95C00B71829 /* .gitignore in Resources */,
 				0AD767551E05C85E00B71829 /* README.md in Resources */,
 				0AB9B7C51E028826006515E2 /* LaunchScreen.storyboard in Resources */,
@@ -218,6 +225,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0AB9B7DF1E029214006515E2 /* Note.swift in Sources */,
+				0ACC2CC11E1A890A0095E84C /* WebViewController.swift in Sources */,
 				0AB9B7BD1E028826006515E2 /* NoteViewController.swift in Sources */,
 				0AB9B7BB1E028826006515E2 /* AppDelegate.swift in Sources */,
 				0AB9B7DB1E028ECB006515E2 /* NotesTableViewController.swift in Sources */,

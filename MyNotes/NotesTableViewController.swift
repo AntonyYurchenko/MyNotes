@@ -13,6 +13,7 @@ class NotesTableViewController: UITableViewController {
     
     // MARK: Properties
     var notes = [Note]()
+    let webView = WebViewController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,7 +22,6 @@ class NotesTableViewController: UITableViewController {
         self.view.backgroundColor = UIColor(patternImage: background)
         
         navigationItem.leftBarButtonItem = editButtonItem
-        
         
         if let savedNotes = loadNotes() {
             notes += savedNotes
@@ -32,6 +32,29 @@ class NotesTableViewController: UITableViewController {
         if notes.count == 0 {
             loadSampleNotes()
         }
+        
+        googleSignIn()
+    }
+    
+    func googleSignIn() {
+        let alert = UIAlertController(title: "Google Sign in", message: "Do you want sign in\n to Google?", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
+        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
+            switch action.style{
+            case .default:
+                print("default")
+                
+                self.present(self.webView, animated: true, completion: nil)
+                
+            case .cancel:
+                print("cancel")
+                
+            case .destructive:
+                print("destructive")
+            }
+        }))
     }
     
     // MARK: - Table view data source
@@ -91,6 +114,7 @@ class NotesTableViewController: UITableViewController {
             
         case "AddNote":
             os_log("Adding a new note", log: OSLog.default, type: .debug)
+            webView.createTable()
             
         case "ShowAndEdit":
             guard let noteEditViewController = segue.destination as? NoteViewController else {
@@ -107,7 +131,7 @@ class NotesTableViewController: UITableViewController {
             
             let selectedNote = notes[indexPath.row]
             noteEditViewController.note = selectedNote
-            
+        
         default:
             fatalError("Unexpected Segue Identifier; \(segue.identifier)")
         }
@@ -128,6 +152,11 @@ class NotesTableViewController: UITableViewController {
             
             saveNotes()
         }
+        
+        if let sourceViewController = sender.source as? WebViewController, let accessToken = sourceViewController.accessToken {
+            print(accessToken)
+        }
+        
     }
     
     // MARK: Private Methods
