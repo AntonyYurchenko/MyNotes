@@ -20,7 +20,6 @@ class NotesTableViewController: UITableViewController {
     
     // MARK: Properties
     var notes = [Note]()
-    let webView = WebViewController()
     var storage : Storage?
     
     override func viewDidLoad() {
@@ -43,8 +42,8 @@ class NotesTableViewController: UITableViewController {
         }))
         
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
-            self.present(self.webView, animated: true, completion: nil)
             self.storage = CreateStorage(false)
+            self.present(self.storage as! UIViewController, animated: true, completion: nil)
             self.continueLoad()
         }))
         
@@ -156,10 +155,5 @@ class NotesTableViewController: UITableViewController {
             }
             
         }
-        
-        if let sourceViewController = sender.source as? WebViewController, let accessToken = sourceViewController.accessToken {
-            print(accessToken)
-        }
-        
     }
 }
