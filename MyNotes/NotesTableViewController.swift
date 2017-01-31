@@ -29,7 +29,7 @@ class NotesTableViewController: UITableViewController {
         self.view.backgroundColor = UIColor(patternImage: background)
         
         navigationItem.leftBarButtonItem = editButtonItem
-        
+
         googleSignIn()
     }
     
@@ -42,11 +42,26 @@ class NotesTableViewController: UITableViewController {
         }))
         
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
-            self.storage = CreateStorage(false)
-            self.present(self.storage as! UIViewController, animated: true, completion: nil)
-            self.continueLoad()
+            let oauthViewController = OAuthViewController()
+            self.present(oauthViewController, animated: true, completion: nil)
+            
+            oauthViewController.accessToken = { accessToken in
+                
+              UserDefaults.standard.set(accessToken, forKey: "access_token")
+                
+                oauthViewController.dismiss(animated: true, completion: nil)
+                
+                self.storage = CreateStorage(false)
+                self.continueLoad()
+            }
+            oauthViewController.cancelFunc = { _ in
+                
+                oauthViewController.dismiss(animated: true, completion: nil)
+                
+                self.storage = CreateStorage(true)
+                self.continueLoad()
+            }
         }))
-        
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -54,7 +69,6 @@ class NotesTableViewController: UITableViewController {
         if let savedNotes = storage?.load() {
             notes += savedNotes
         }
-        
         self.tableView.reloadData()
     }
     
@@ -153,7 +167,6 @@ class NotesTableViewController: UITableViewController {
                 
                 storage?.add(note)
             }
-            
         }
     }
 }
