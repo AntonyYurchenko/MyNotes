@@ -66,10 +66,13 @@ class NotesTableViewController: UITableViewController {
     }
     
     func continueLoad() {
+        print(1)
         if let savedNotes = storage?.load() {
+            print(2)
             notes += savedNotes
+
+            self.tableView.reloadData()
         }
-        self.tableView.reloadData()
     }
     
     // MARK: - Table view data source
@@ -159,13 +162,12 @@ class NotesTableViewController: UITableViewController {
                 tableView.reloadRows(at: [selectedIndexPath], with: .none)
                 
                 storage?.update(index: selectedIndexPath.row, note: note)
-            }
-            else {
+            } else {
                 let newIndexPath = IndexPath(row: notes.count, section: 0)
                 notes.append(note)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
                 
-                storage?.add(note)
+                storage?.add(index: newIndexPath.row + 1, note:  note)
             }
         }
     }

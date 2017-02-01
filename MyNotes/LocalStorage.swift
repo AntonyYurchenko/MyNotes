@@ -25,7 +25,7 @@ class LocalStorage : Storage {
         return notes
     }
     
-    func add(_ note: Note) {
+    func add(index : Int, note: Note) {
         notes.append(note)
         
         save()

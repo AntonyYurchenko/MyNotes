@@ -53,7 +53,7 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
     func createAuthorizationEndpoint() -> URL {
         let host = "https://accounts.google.com"
         let endPoint = "/o/oauth2/v2/auth?"
-        let scopes = "scope=email%20profile%20https://www.googleapis.com/auth/spreadsheets"
+        let scopes = "scope=https://www.googleapis.com/auth/spreadsheets%20https://www.googleapis.com/auth/drive"
         let redirect_uri = "&redirect_uri=" + self.redirect_uri
         let response_type = "&response_type=code"
         let client_id = "&client_id=" + self.client_id
