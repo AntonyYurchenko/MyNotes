@@ -21,8 +21,8 @@ class LocalStorage : Storage {
         }
     }
     
-    func load() -> [Note] {
-        return notes
+    func load(handler: @escaping (_ : [Note]?) -> Void) {
+        handler(notes)
     }
     
     func add(index : Int, note: Note) {

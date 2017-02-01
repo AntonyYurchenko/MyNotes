@@ -21,56 +21,85 @@ class NotesTableViewController: UITableViewController {
     // MARK: Properties
     var notes = [Note]()
     var storage : Storage?
+    let indicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        indicator.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        indicator.isUserInteractionEnabled = false
+        indicator.frame = self.view.bounds
+        indicator.color = UIColor.darkGray
+        view.addSubview(indicator)
+        indicator.startAnimating()
+    
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         
         navigationItem.leftBarButtonItem = editButtonItem
-
+        
         googleSignIn()
     }
     
     func googleSignIn() {
         
+        let oauthViewController = OAuthViewController()
+        
+        if oauthViewController.getRefreshToken() {
+            oauthViewController.accessTokenTaken = {
+                self.storage = CreateStorage(false)
+                self.storage?.load(handler: { note in
+                    self.storage?.load(handler: { note in
+                        self.continueLoad(note)
+                    })
+                })
+            }
+            return
+        }
+        
         let alert = UIAlertController(title: "Google Sign in", message: "Do you want sign in\n to Google?", preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.default, handler: { action in
             self.storage = CreateStorage(true)
-            self.continueLoad()
+            self.storage?.load(handler: { note in
+                self.continueLoad(note)
+            })
         }))
         
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
-            let oauthViewController = OAuthViewController()
+            
             self.present(oauthViewController, animated: true, completion: nil)
             
-            oauthViewController.accessToken = { accessToken in
-                
-              UserDefaults.standard.set(accessToken, forKey: "access_token")
-                
+            oauthViewController.accessTokenTaken = {
                 oauthViewController.dismiss(animated: true, completion: nil)
                 
                 self.storage = CreateStorage(false)
-                self.continueLoad()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    self.storage?.load(handler: { note in
+                        self.storage?.load(handler: { note in
+                            self.continueLoad(note)
+                        })
+                    })
+                }
             }
             oauthViewController.cancelFunc = { _ in
                 
                 oauthViewController.dismiss(animated: true, completion: nil)
                 
                 self.storage = CreateStorage(true)
-                self.continueLoad()
+                self.storage?.load(handler: { note in
+                    self.continueLoad(note)
+                })
             }
         }))
         self.present(alert, animated: true, completion: nil)
     }
     
-    func continueLoad() {
-        print(1)
-        if let savedNotes = storage?.load() {
-            print(2)
+    func continueLoad(_ note: [Note]?) {
+        if let savedNotes = note {
             notes += savedNotes
-
+            print(notes.count)
+            print("123")
+            indicator.stopAnimating()
             self.tableView.reloadData()
         }
     }
@@ -112,7 +141,7 @@ class NotesTableViewController: UITableViewController {
             notes.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             
-            storage?.delete(index: indexPath.row)
+            storage?.delete(index: indexPath.row + 1)
         } else if editingStyle == .insert {}
     }
     
@@ -161,7 +190,7 @@ class NotesTableViewController: UITableViewController {
                 notes[selectedIndexPath.row] = note
                 tableView.reloadRows(at: [selectedIndexPath], with: .none)
                 
-                storage?.update(index: selectedIndexPath.row, note: note)
+                storage?.update(index: selectedIndexPath.row + 1, note: note)
             } else {
                 let newIndexPath = IndexPath(row: notes.count, section: 0)
                 notes.append(note)

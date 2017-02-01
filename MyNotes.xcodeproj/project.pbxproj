@@ -22,6 +22,7 @@
 		0AB9B7DB1E028ECB006515E2 /* NotesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DA1E028ECB006515E2 /* NotesTableViewController.swift */; };
 		0AB9B7DD1E028FE0006515E2 /* NoteTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DC1E028FE0006515E2 /* NoteTableViewCell.swift */; };
 		0AB9B7DF1E029214006515E2 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB9B7DE1E029214006515E2 /* Note.swift */; };
+		0ABB9D611E42682500B48D33 /* JsonParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABB9D601E42682500B48D33 /* JsonParser.swift */; };
 		0AD767551E05C85E00B71829 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 0AD767541E05C85E00B71829 /* README.md */; };
 		0AD767571E05C95C00B71829 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 0AD767561E05C95C00B71829 /* .gitignore */; };
 /* End PBXBuildFile section */
@@ -56,6 +57,7 @@
 		0AB9B7DA1E028ECB006515E2 /* NotesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotesTableViewController.swift; sourceTree = "<group>"; };
 		0AB9B7DC1E028FE0006515E2 /* NoteTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteTableViewCell.swift; sourceTree = "<group>"; };
 		0AB9B7DE1E029214006515E2 /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		0ABB9D601E42682500B48D33 /* JsonParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JsonParser.swift; sourceTree = "<group>"; };
 		0AD767541E05C85E00B71829 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		0AD767561E05C95C00B71829 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -113,6 +115,7 @@
 				0AD767541E05C85E00B71829 /* README.md */,
 				0A7550731E40795D008954CD /* OAuthViewController.swift */,
 				0A7550711E4072C3008954CD /* HttpRequest.swift */,
+				0ABB9D601E42682500B48D33 /* JsonParser.swift */,
 				0A3067A21E3F5A5A0091F826 /* Storage.swift */,
 				0A3067A41E3F5AB20091F826 /* LocalStorage.swift */,
 				0A3067A61E3F5AF10091F826 /* GoogleStorage.swift */,
@@ -179,6 +182,7 @@
 				TargetAttributes = {
 					0AB9B7B61E028826006515E2 = {
 						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = HHHUR439AA;
 						ProvisioningStyle = Automatic;
 					};
 					0AB9B7CA1E028826006515E2 = {
@@ -244,6 +248,7 @@
 				0A7550721E4072C3008954CD /* HttpRequest.swift in Sources */,
 				0A3067A51E3F5AB20091F826 /* LocalStorage.swift in Sources */,
 				0AB9B7DB1E028ECB006515E2 /* NotesTableViewController.swift in Sources */,
+				0ABB9D611E42682500B48D33 /* JsonParser.swift in Sources */,
 				0AB9B7DD1E028FE0006515E2 /* NoteTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -326,7 +331,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -369,7 +374,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -381,7 +386,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = HHHUR439AA;
 				INFOPLIST_FILE = MyNotes/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -395,7 +400,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = HHHUR439AA;
 				INFOPLIST_FILE = MyNotes/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

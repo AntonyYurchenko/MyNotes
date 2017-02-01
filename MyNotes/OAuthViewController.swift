@@ -6,14 +6,16 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
     let webView : UIWebView = UIWebView()
     let redirect_uri = "http://127.0.0.1:9004"
     var client_id = ""
-    var accessToken : ((String) -> Void)?
+    var accessToken : String?
+    var refreshToken : String?
+    var accessTokenTaken : (() -> Void)?
     var cancelFunc : (() -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         loadClientId()
-
+        
         let screenBounds = UIScreen.main.bounds
         let navigationBar: UINavigationBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: screenBounds.width, height: 54))
         let navigationItem = UINavigationItem(title: "Google SignIn");
@@ -47,6 +49,31 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
             }
         } catch {
             print("error: \(error)")
+        }
+    }
+    
+    func getRefreshToken() -> Bool {
+        if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
+            
+            loadClientId()
+            
+            let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
+            let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
+            let params = "client_id=" + client_id +
+                "&refresh_token=" + refreshToken +
+            "&grant_type=refresh_token"
+            let body = params.data(using: String.Encoding.utf8)!
+            
+            HttpRequest.postRequest(path: tokenEndpoint, headers: headers, body: body, handler: { data, response, error in
+                let json = JsonParser.parse(data: data!) as! [String : AnyObject]
+                let accessToken = json["access_token"] as? String
+                UserDefaults.standard.set(accessToken, forKey: "access_token")
+                self.accessTokenTaken!()
+            })
+            
+            return true
+        } else {
+            return false
         }
     }
     
@@ -85,13 +112,12 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
                 let body = params.data(using: String.Encoding.utf8)!
                 
                 HttpRequest.postRequest(path: tokenEndpoint, headers: headers, body: body, handler: { data, response, error in
-                    do {
-                        if let json = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? [String: Any] {
-                            self.accessToken!((json["access_token"] as? String)!)
-                        }
-                    } catch {
-                        print("error: \(error)")
-                    }
+                    let json = JsonParser.parse(data: data!) as! [String : AnyObject]
+                    self.accessToken = json["access_token"] as? String
+                    self.refreshToken = json["refresh_token"] as? String
+                    UserDefaults.standard.set(self.accessToken, forKey: "access_token")
+                    UserDefaults.standard.set(self.accessToken, forKey: "refresh_token")
+                    self.accessTokenTaken!()
                 })
             }
         }
