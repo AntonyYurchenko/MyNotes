@@ -53,6 +53,5 @@ class Note : NSObject, NSCoding{
         }
         
         self.init(title: title, text: text, date: date)
-        
     }
 }

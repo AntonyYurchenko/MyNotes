@@ -9,7 +9,7 @@
 import UIKit
 import os.log
 
-func CreateStorage(_ isLocal : Bool) -> Storage {
+func CreateStorage(isLocal : Bool) -> Storage {
     if isLocal {
         return LocalStorage()
     } else {
@@ -21,87 +21,29 @@ class NotesTableViewController: UITableViewController {
     // MARK: Properties
     var notes = [Note]()
     var storage : Storage?
-    let indicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        indicator.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        indicator.isUserInteractionEnabled = false
-        indicator.frame = self.view.bounds
-        indicator.color = UIColor.darkGray
-        view.addSubview(indicator)
-        indicator.startAnimating()
-    
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
-        
         navigationItem.leftBarButtonItem = editButtonItem
         
-        googleSignIn()
-    }
-    
-    func googleSignIn() {
+        let alertController = UIAlertController(title: "Google SignIn",
+                                                message: "Do you want to use google sheets for store your notes?",
+                                                preferredStyle: .alert)
         
-        let oauthViewController = OAuthViewController()
+        let noAction = UIAlertAction(title: "No", style: .cancel, handler: { action in
+
+        })
+        let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
+            self.present(OAuthViewController(), animated: true, completion: nil)
+        })
         
-        if oauthViewController.getRefreshToken() {
-            oauthViewController.accessTokenTaken = {
-                self.storage = CreateStorage(false)
-                self.storage?.load(handler: { note in
-                    self.storage?.load(handler: { note in
-                        self.continueLoad(note)
-                    })
-                })
-            }
-            return
-        }
+        alertController.addAction(noAction)
+        alertController.addAction(yesAction)
         
-        let alert = UIAlertController(title: "Google Sign in", message: "Do you want sign in\n to Google?", preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.default, handler: { action in
-            self.storage = CreateStorage(true)
-            self.storage?.load(handler: { note in
-                self.continueLoad(note)
-            })
-        }))
-        
-        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
-            
-            self.present(oauthViewController, animated: true, completion: nil)
-            
-            oauthViewController.accessTokenTaken = {
-                oauthViewController.dismiss(animated: true, completion: nil)
-                
-                self.storage = CreateStorage(false)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    self.storage?.load(handler: { note in
-                        self.storage?.load(handler: { note in
-                            self.continueLoad(note)
-                        })
-                    })
-                }
-            }
-            oauthViewController.cancelFunc = { _ in
-                
-                oauthViewController.dismiss(animated: true, completion: nil)
-                
-                self.storage = CreateStorage(true)
-                self.storage?.load(handler: { note in
-                    self.continueLoad(note)
-                })
-            }
-        }))
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    func continueLoad(_ note: [Note]?) {
-        if let savedNotes = note {
-            notes += savedNotes
-            print(notes.count)
-            print("123")
-            indicator.stopAnimating()
-            self.tableView.reloadData()
-        }
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Table view data source
