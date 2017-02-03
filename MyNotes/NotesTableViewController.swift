@@ -104,7 +104,7 @@ class NotesTableViewController: UITableViewController {
         case "AddNote":
             os_log("Adding a new note", log: OSLog.default, type: .debug)
             
-        case "Edit":
+        case "EditNote":
             guard let noteEditViewController = segue.destination as? NoteViewController else {
                 fatalError("Unexpected destination: \(segue.destination)")
             }

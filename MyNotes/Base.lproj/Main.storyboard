@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="nCA-1r-ypJ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="nCA-1r-ypJ">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,7 +24,7 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="lT3-kX-kFp" id="0tp-jK-dwM">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="59.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="59"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZR7-Cj-Y7Q">
@@ -63,7 +63,7 @@
                                     <outlet property="dateLabel" destination="XhN-IN-3la" id="uHZ-He-SVY"/>
                                     <outlet property="noteLabel" destination="53t-oy-31A" id="xVS-TP-5SD"/>
                                     <outlet property="titleLabel" destination="ZR7-Cj-Y7Q" id="OLv-dh-djl"/>
-                                    <segue destination="BYZ-38-t0r" kind="show" identifier="Edit" id="Hsy-Sj-XNn"/>
+                                    <segue destination="BYZ-38-t0r" kind="show" identifier="EditNote" id="Hsy-Sj-XNn"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -82,7 +82,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bSZ-Ig-hUu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="191.19999999999999" y="136.28185907046478"/>
+            <point key="canvasLocation" x="180" y="135"/>
         </scene>
         <!--Note View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -112,15 +112,15 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="doneBtn" destination="DeM-vR-CnZ" id="Rqm-k0-1Sh"/>
-                        <outlet property="noteTextView" destination="Mbj-2s-1lE" id="dpF-BU-7nZ"/>
+                        <outlet property="doneBarBtn" destination="DeM-vR-CnZ" id="PTU-5c-29q"/>
+                        <outlet property="textView" destination="Mbj-2s-1lE" id="PIV-dN-U8j"/>
                         <segue destination="Gbi-DM-QkS" kind="unwind" identifier="unwindToNotesTable" unwindAction="unwindToNotesTableWithSender:" id="1W2-Xk-Use"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <exit id="Gbi-DM-QkS" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1764" y="134.48275862068968"/>
+            <point key="canvasLocation" x="943" y="136"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="fgS-dD-kNR">
@@ -144,30 +144,8 @@
             </objects>
             <point key="canvasLocation" x="-599" y="136"/>
         </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="2OD-qh-Lt9">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="gKI-zD-90a" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="mWp-qK-Dum">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <color key="tintColor" red="0.66525222080000002" green="0.56598520519999995" blue="0.47211457629999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <textAttributes key="titleTextAttributes">
-                            <color key="textColor" red="0.66525222081218272" green="0.56598520518670348" blue="0.47211457627327724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </textAttributes>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="oS2-Vz-09V"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="26D-Pd-Vuq" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="985" y="509"/>
-        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="YJ8-bQ-x1c"/>
+        <segue reference="Hsy-Sj-XNn"/>
     </inferredMetricsTieBreakers>
 </document>
