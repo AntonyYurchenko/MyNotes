@@ -1,11 +1,3 @@
-//
-//  NotesTableViewController.swift
-//  MyNotes
-//
-//  Created by Antony Yurchenko on 15/12/16.
-//  Copyright © 2016 antonybrro. All rights reserved.
-//
-
 import UIKit
 import os.log
 
@@ -29,21 +21,29 @@ class NotesTableViewController: UITableViewController {
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.leftBarButtonItem = editButtonItem
         
-        let alertController = UIAlertController(title: "Google SignIn",
-                                                message: "Do you want to use google sheets for store your notes?",
-                                                preferredStyle: .alert)
-        
-        let noAction = UIAlertAction(title: "No", style: .cancel, handler: { action in
-
-        })
-        let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
-            self.present(OAuthViewController(), animated: true, completion: nil)
-        })
-        
-        alertController.addAction(noAction)
-        alertController.addAction(yesAction)
-        
-        present(alertController, animated: true, completion: nil)
+        if UserDefaults.standard.bool(forKey: "is_local") {
+            self.storage = CreateStorage(isLocal: true)
+            self.storage?.load(handler: { notes in
+                self.notes = notes!
+            })
+        } else {
+            let alertController = UIAlertController(title: "Google SignIn",
+                                                    message: "Do you want to use google sheets for store your notes?",
+                                                    preferredStyle: .alert)
+            
+            let noAction = UIAlertAction(title: "No", style: .default, handler: { action in
+                self.storage = CreateStorage(isLocal: true)
+                UserDefaults.standard.set(true, forKey: "is_local")
+            })
+            let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
+                self.present(OAuthViewController(), animated: true, completion: nil)
+            })
+            
+            alertController.addAction(noAction)
+            alertController.addAction(yesAction)
+            
+            present(alertController, animated: true, completion: nil)
+        }
     }
     
     // MARK: - Table view data source
@@ -83,7 +83,7 @@ class NotesTableViewController: UITableViewController {
             notes.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             
-            storage?.delete(index: indexPath.row + 1)
+            storage?.delete(index: indexPath.row )
         } else if editingStyle == .insert {}
     }
     
@@ -104,7 +104,7 @@ class NotesTableViewController: UITableViewController {
         case "AddNote":
             os_log("Adding a new note", log: OSLog.default, type: .debug)
             
-        case "ShowAndEdit":
+        case "Edit":
             guard let noteEditViewController = segue.destination as? NoteViewController else {
                 fatalError("Unexpected destination: \(segue.destination)")
             }
@@ -119,26 +119,32 @@ class NotesTableViewController: UITableViewController {
             
             let selectedNote = notes[indexPath.row]
             noteEditViewController.note = selectedNote
-            
         default:
             fatalError("Unexpected Segue Identifier; \(segue.identifier)")
         }
     }
     
-    @IBAction func unwindToNoteList(sender: UIStoryboardSegue) {
+    @IBAction func unwindToNotesTable(sender: UIStoryboardSegue) {
         if let sourceViewController = sender.source as? NoteViewController, let note = sourceViewController.note {
             
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
-                notes[selectedIndexPath.row] = note
-                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+                let oldNote = notes[selectedIndexPath.row]
                 
-                storage?.update(index: selectedIndexPath.row + 1, note: note)
+                //TODO check how to compare two objects by fields
+                if oldNote.title != note.title ||
+                    oldNote.text != note.text ||
+                    oldNote.date != note.date {
+                    notes[selectedIndexPath.row] = note
+                    tableView.reloadRows(at: [selectedIndexPath], with: .none)
+                    
+                    storage?.update(index: selectedIndexPath.row, note: note)
+                }
             } else {
                 let newIndexPath = IndexPath(row: notes.count, section: 0)
                 notes.append(note)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
                 
-                storage?.add(index: newIndexPath.row + 1, note:  note)
+                storage?.add(index: newIndexPath.row, note:  note)
             }
         }
     }

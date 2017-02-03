@@ -1,11 +1,3 @@
-//
-//  Note.swift
-//  MyNotes
-//
-//  Created by Antony Yurchenko on 15/12/16.
-//  Copyright © 2016 antonybrro. All rights reserved.
-//
-
 import UIKit
 import os.log
 

@@ -28,7 +28,7 @@ class GoogleStorage : Storage {
         
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.postRequest(path: path, headers: headers, body: body!, handler: { data, response, error in
+        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
             let json = JsonParser.parse(data: data!)
             let parentId = json?["id"] as? String
             
@@ -47,7 +47,7 @@ class GoogleStorage : Storage {
         
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.postRequest(path: path, headers: headers, body: body!, handler: { data, response, error in
+        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
             let json = JsonParser.parse(data: data!)
             self.spreadsheetId = json?["id"] as? String
             UserDefaults.standard.set(self.spreadsheetId, forKey: "spreadsheet_id")
@@ -66,7 +66,7 @@ class GoogleStorage : Storage {
         
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.postRequest(path: path, headers: headers, body: body!, handler: { data, response, error in
+        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
             
         })
     }
@@ -78,7 +78,7 @@ class GoogleStorage : Storage {
                        "Authorization" : "Bearer " + accessToken!]
         var notes = [Note]()
         
-        HttpRequest.getRequest(path: path, headers: headers, handler: { data, response, error in
+        HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
             
             let json = JsonParser.parse(data: data!)
             
@@ -101,7 +101,7 @@ class GoogleStorage : Storage {
         let params = ["values" : [[note.title, note.text, note.date]]]
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.putRequest(path: path, headers: headers, body: body!, handler: { data, response, error in })
+        HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in })
     }
     
     func update(index : Int, note : Note) {
@@ -118,6 +118,6 @@ class GoogleStorage : Storage {
                                                                      "endIndex" : index]]]]]
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.postRequest(path: path, headers: headers, body: body!, handler: { data, response, error in })
+        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in })
     }
 }

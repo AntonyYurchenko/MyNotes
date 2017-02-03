@@ -8,13 +8,6 @@ class LocalStorage : Storage {
     init() {
         if let savedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: Note.ArchiveURL.path) as? [Note] {
             notes += savedNotes
-        } else {
-            let dateFormat = DateFormatter()
-            dateFormat.dateFormat = "dd.MM.yy"
-            
-            let note = Note(title: "This is the sample note", text: "You can create your own notes with this app.", date: dateFormat.string(from: Date()))
-            
-            notes.append(note)
         }
     }
     
