@@ -20,7 +20,7 @@
 			<key>Key</key>
 			<string>is_google_sync</string>
 			<key>DefaultValue</key>
-			<false/>
+			<true/>
 		</dict>
 	</array>
 </dict>

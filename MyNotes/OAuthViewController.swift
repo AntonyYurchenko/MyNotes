@@ -7,6 +7,7 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
     let navigationBar = UINavigationBar()
     let redirectUri = "http://127.0.0.1:9004"
     var clientId : String?
+    var accessTokenTaken = DispatchWorkItem {}
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +21,11 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
         let cancelItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(OAuthViewController.cancel))
         navigationItem.leftBarButtonItem = cancelItem;
         navigationBar.setItems([navigationItem], animated: false);
+        
+        if let id = OAuthViewController.getClientId() {
+            clientId = id
+            loadAuthorizationRequestURL()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,18 +35,13 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
         navigationBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: navigationBarHeight)
         navigationBar.barTintColor =  UIColor(red: 247.0/255, green: 243.0/255, blue: 235.0/255, alpha: 1.0)
         webView.frame = CGRect(x: 0, y: navigationBarHeight, width: view.bounds.width, height: view.bounds.height)
-        
-        if let id = getClientId() {
-            clientId = id
-            loadAuthorizationRequestURL()
-        }
     }
     
     func cancel() {
         dismiss(animated: true, completion: nil)
     }
     
-    func getClientId() -> String? {
+    static func getClientId() -> String? {
         var clientId : String?
         let path = Bundle.main.path(forResource: "credentials", ofType: "json")
         let url = URL(fileURLWithPath : path!)
@@ -66,7 +67,8 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
         let authorizationEndpoint = host + endPoint + scopes + redirect_uri + response_type + client_id
         
         UserDefaults.standard.register(defaults: ["UserAgent": "custom value"])
-        webView.loadRequest(URLRequest(url: URL(string: authorizationEndpoint)!))
+
+        self.webView.loadRequest(URLRequest(url: URL(string: authorizationEndpoint)!))
     }
     
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
@@ -101,25 +103,10 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
             let refreshToken = json["refresh_token"] as? String
             UserDefaults.standard.set(accessToken, forKey: "access_token")
             UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
-            
-            print(accessToken)
+    
+            self.accessTokenTaken.perform()
         })
     }
     
-    func getRefreshToken() {
-        if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
-            let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
-            let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
-            let params = "client_id=" + clientId! +
-                "&refresh_token=" + refreshToken +
-            "&grant_type=refresh_token"
-            let body = params.data(using: String.Encoding.utf8)!
-            
-            HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
-                let json = JsonParser.parse(data: data!) as! [String : AnyObject]
-                let accessToken = json["access_token"] as? String
-                UserDefaults.standard.set(accessToken, forKey: "access_token")
-            })
-        }
-    }
+    
 }

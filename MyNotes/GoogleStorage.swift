@@ -5,9 +5,14 @@ class GoogleStorage : Storage {
     // MARK: Properties
     var accessToken : String?
     var spreadsheetId : String?
+    let semaphore = DispatchSemaphore(value: 0)
     
     init() {
-        accessToken = UserDefaults.standard.string(forKey: "access_token")!
+        if let accessTokenOpt = UserDefaults.standard.string(forKey: "access_token") {
+            accessToken = accessTokenOpt
+        } else {
+            getRefreshToken()
+        }
         
         if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
             spreadsheetId = id
@@ -34,6 +39,7 @@ class GoogleStorage : Storage {
             
             self.createSpreadsheets(parentId: parentId!)
         })
+        _ = semaphore.wait(timeout: .distantFuture)
     }
     
     func createSpreadsheets(parentId : String) {
@@ -52,6 +58,7 @@ class GoogleStorage : Storage {
             self.spreadsheetId = json?["id"] as? String
             UserDefaults.standard.set(self.spreadsheetId, forKey: "spreadsheet_id")
             print("createSpreadsheets", self.spreadsheetId!)
+            self.semaphore.signal()
             self.updateSheetProperties()
         })
     }
@@ -69,6 +76,27 @@ class GoogleStorage : Storage {
         HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
             
         })
+    }
+    
+    func getRefreshToken() {
+        if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
+            let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
+            let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
+            let params = "client_id=" + OAuthViewController.getClientId()! +
+                "&refresh_token=" + refreshToken +
+            "&grant_type=refresh_token"
+            let body = params.data(using: String.Encoding.utf8)!
+            
+            HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
+                let json = JsonParser.parse(data: data!) as! [String : AnyObject]
+                let accessToken = json["access_token"] as? String
+                UserDefaults.standard.set(accessToken, forKey: "access_token")
+                
+                self.semaphore.signal()
+            })
+            
+            _ = semaphore.wait(timeout: .distantFuture)
+        }
     }
     
     func load(handler: @escaping (_ : [Note]?) -> Void) {
@@ -92,17 +120,18 @@ class GoogleStorage : Storage {
                 
                 handler(notes)
             })
-            
         }
     }
     
     func add(index : Int, note: Note) {
-        let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A\(index):C\(index)?valueInputOption=USER_ENTERED"
+        let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A\(index + 1):C\(index + 1)?valueInputOption=USER_ENTERED"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
         
         let params = ["values" : [[note.title, note.text, note.date]]]
         let body = JsonParser.parse(params: params)
+        
+        print(note.title, note.text, note.date)
         
         HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in })
     }
@@ -117,8 +146,8 @@ class GoogleStorage : Storage {
                        "Authorization" : "Bearer " + accessToken!]
         
         let params = ["requests" : [["deleteDimension" : ["range" : ["dimension" : "ROWS",
-                                                                     "startIndex" : index - 1,
-                                                                     "endIndex" : index]]]]]
+                                                                     "startIndex" : index,
+                                                                     "endIndex" : index + 1]]]]]
         let body = JsonParser.parse(params: params)
         
         HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in })

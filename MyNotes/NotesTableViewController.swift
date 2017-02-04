@@ -17,21 +17,46 @@ class NotesTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if !UserDefaults.standard.bool(forKey: "HasLaunchedOnce") {
+            UserDefaults.standard.register(defaults: ["is_google_sync": true])
+        }
+        
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.leftBarButtonItem = editButtonItem
         
+        checkSource()
+    }
+    
+    func checkSource() {
         if UserDefaults.standard.bool(forKey: "is_google_sync") {
-            oauth()
+            if let _ = UserDefaults.standard.string(forKey: "refresh_token") {
+                loadData()
+            } else {
+                createAlertDialog()
+            }
         } else {
-            self.storage = CreateStorage()
-            self.storage?.load(handler: { notes in
-                self.notes = notes!
-            })
+            UserDefaults.standard.set(false, forKey: "is_google_sync")
+            loadData()
         }
     }
     
-    func oauth() {
+    func loadData() {
+        self.storage = CreateStorage()
+        
+        self.storage?.load(handler: { notes in
+            if let loadNotes = notes {
+                print(loadNotes)
+                self.notes = loadNotes
+                
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        })
+    }
+    
+    func createAlertDialog() {
         let alertController = UIAlertController(title: "Google SignIn",
                                                 message: "Do you want to use google sheets for store your notes?",
                                                 preferredStyle: .alert)
@@ -41,14 +66,30 @@ class NotesTableViewController: UITableViewController {
             self.storage = CreateStorage()
         })
         let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
-            self.present(OAuthViewController(), animated: true, completion: nil)
-        
+            self.authorization()
         })
         
         alertController.addAction(noAction)
         alertController.addAction(yesAction)
         
         present(alertController, animated: true, completion: nil)
+    }
+    
+    func authorization() {
+        let oauthViewController = OAuthViewController()
+        self.present(oauthViewController, animated: true, completion: nil)
+        
+        oauthViewController.accessTokenTaken.notify(queue: DispatchQueue.main) {
+            self.dismiss(animated: true, completion: nil)
+            
+            if let accessToken = UserDefaults.standard.string(forKey: "access_token") {
+                if !accessToken.isEmpty {
+                    UserDefaults.standard.set(true, forKey: "is_google_sync")
+                    
+                    self.storage = CreateStorage()
+                }
+            }
+        }
     }
     
     // MARK: - Table view data source
