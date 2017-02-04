@@ -1,7 +1,7 @@
 import UIKit
 
 class NoteTableViewCell: UITableViewCell {
-
+    
     // MARK: Properties
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var noteLabel: UILabel!
@@ -16,8 +16,21 @@ class NoteTableViewCell: UITableViewCell {
     }
     
     func setNote(_ note: Note) {
-        titleLabel.text = note.title
-        noteLabel.text = note.text
+        for title in note.title.components(separatedBy: "\n") {
+            if !title.isEmpty {
+                titleLabel.text = title
+            }
+        }
+        
+        for text in note.text.components(separatedBy: "\n") {
+            if !text.isEmpty {
+                noteLabel.text = text
+                break
+            } else {
+                noteLabel.text = "No additional text"
+            }
+        }
+        
         dateLabel.text = note.date
     }
 }

@@ -7,8 +7,6 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
     let navigationBar = UINavigationBar()
     let redirectUri = "http://127.0.0.1:9004"
     var clientId : String?
-    var accessToken : String?
-    var refreshToken : String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -99,25 +97,29 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
         
         HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
             let json = JsonParser.parse(data: data!) as! [String : AnyObject]
-            self.accessToken = json["access_token"] as? String
-            self.refreshToken = json["refresh_token"] as? String
-            UserDefaults.standard.set(self.accessToken, forKey: "access_token")
-            UserDefaults.standard.set(self.accessToken, forKey: "refresh_token")
+            let accessToken = json["access_token"] as? String
+            let refreshToken = json["refresh_token"] as? String
+            UserDefaults.standard.set(accessToken, forKey: "access_token")
+            UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
+            
+            print(accessToken)
         })
     }
     
     func getRefreshToken() {
-        let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
-        let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
-        let params = "client_id=" + clientId! +
-            "&refresh_token=" + refreshToken! +
-        "&grant_type=refresh_token"
-        let body = params.data(using: String.Encoding.utf8)!
-        
-        HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!) as! [String : AnyObject]
-            let accessToken = json["access_token"] as? String
-            UserDefaults.standard.set(accessToken, forKey: "access_token")
-        })
+        if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
+            let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
+            let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
+            let params = "client_id=" + clientId! +
+                "&refresh_token=" + refreshToken +
+            "&grant_type=refresh_token"
+            let body = params.data(using: String.Encoding.utf8)!
+            
+            HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
+                let json = JsonParser.parse(data: data!) as! [String : AnyObject]
+                let accessToken = json["access_token"] as? String
+                UserDefaults.standard.set(accessToken, forKey: "access_token")
+            })
+        }
     }
 }

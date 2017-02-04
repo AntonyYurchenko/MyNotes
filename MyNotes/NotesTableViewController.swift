@@ -1,11 +1,11 @@
 import UIKit
 import os.log
 
-func CreateStorage(isLocal : Bool) -> Storage {
-    if isLocal {
-        return LocalStorage()
-    } else {
+func CreateStorage() -> Storage {
+    if UserDefaults.standard.bool(forKey: "is_google_sync") {
         return GoogleStorage()
+    } else {
+        return LocalStorage()
     }
 }
 class NotesTableViewController: UITableViewController {
@@ -21,29 +21,34 @@ class NotesTableViewController: UITableViewController {
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.leftBarButtonItem = editButtonItem
         
-        if UserDefaults.standard.bool(forKey: "is_local") {
-            self.storage = CreateStorage(isLocal: true)
+        if UserDefaults.standard.bool(forKey: "is_google_sync") {
+            oauth()
+        } else {
+            self.storage = CreateStorage()
             self.storage?.load(handler: { notes in
                 self.notes = notes!
             })
-        } else {
-            let alertController = UIAlertController(title: "Google SignIn",
-                                                    message: "Do you want to use google sheets for store your notes?",
-                                                    preferredStyle: .alert)
-            
-            let noAction = UIAlertAction(title: "No", style: .default, handler: { action in
-                self.storage = CreateStorage(isLocal: true)
-                UserDefaults.standard.set(true, forKey: "is_local")
-            })
-            let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
-                self.present(OAuthViewController(), animated: true, completion: nil)
-            })
-            
-            alertController.addAction(noAction)
-            alertController.addAction(yesAction)
-            
-            present(alertController, animated: true, completion: nil)
         }
+    }
+    
+    func oauth() {
+        let alertController = UIAlertController(title: "Google SignIn",
+                                                message: "Do you want to use google sheets for store your notes?",
+                                                preferredStyle: .alert)
+        
+        let noAction = UIAlertAction(title: "No", style: .default, handler: { action in
+            UserDefaults.standard.set(false, forKey: "is_google_sync")
+            self.storage = CreateStorage()
+        })
+        let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
+            self.present(OAuthViewController(), animated: true, completion: nil)
+        
+        })
+        
+        alertController.addAction(noAction)
+        alertController.addAction(yesAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Table view data source

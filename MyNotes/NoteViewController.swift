@@ -24,7 +24,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         super.viewWillAppear(animated)
         
         if let note = note {
-            textView.text = String("\(note.title)\n\(note.text)")
+            textView.text = String(note.title + note.text)
         }
     }
     
@@ -57,36 +57,49 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         
-        //TODO Refactor string parsing
         if let text = textView.text {
             if !text.isEmpty {
-                var separatedText = [String]()
-                for string in text.components(separatedBy: "\n") {
-                    separatedText.append(string)
-                }
-                
-                var title = separatedText[0]
-                separatedText.remove(at: 0)
-                
-                var text = String()
-                for string in separatedText {
-                    text.append(string + "\n")
-                }
-                if !separatedText.isEmpty {
-                    text.remove(at: text.index(before: text.endIndex))
-                } else {
-                    title = textView.text
-                }
-                
-                let dateFormat = DateFormatter()
-                dateFormat.dateFormat = "dd.MM.yy"
-                let date = dateFormat.string(from: Date())
-                
-                note = Note(title: title, text: text, date: date)
+                parseText(text)
             } else {
                 return
             }
         }
+    }
+    
+    //TODO Refactor string parsing
+    func parseText(_ text: String) {
+        var separatedText = [String]()
+        for string in text.components(separatedBy: "\n") {
+            separatedText.append(string)
+        }
+        
+        var title = String()
+        
+        for element in separatedText {
+            if !element.isEmpty {
+                title += element
+                if let index = separatedText.index(of: element) {
+                    separatedText.remove(at: index)
+                }
+                break
+            } else {
+                title += element + "\n"
+                if let index = separatedText.index(of: element) {
+                    separatedText.remove(at: index)
+                }
+            }
+        }
+        
+        var text = String()
+        for string in separatedText {
+            text.append("\n" + string)
+        }
+        
+        let dateFormat = DateFormatter()
+        dateFormat.dateFormat = "dd.MM.yy"
+        let date = dateFormat.string(from: Date())
+        
+        note = Note(title: title, text: text, date: date)
     }
 }
 

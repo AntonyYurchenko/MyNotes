@@ -72,25 +72,28 @@ class GoogleStorage : Storage {
     }
     
     func load(handler: @escaping (_ : [Note]?) -> Void) {
-        let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
-        
-        let headers = ["Content-Type" : "application/json",
-                       "Authorization" : "Bearer " + accessToken!]
-        var notes = [Note]()
-        
-        HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
+        if spreadsheetId != nil {
+            let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
             
-            let json = JsonParser.parse(data: data!)
+            let headers = ["Content-Type" : "application/json",
+                           "Authorization" : "Bearer " + accessToken!]
+            var notes = [Note]()
             
-            let values = json?["values"] as? [[String]]
-            if values != nil {
-                for note in values! {
-                    notes.append(Note(title: note[0], text: note[1], date: note[2]))
+            HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
+                
+                let json = JsonParser.parse(data: data!)
+                
+                let values = json?["values"] as? [[String]]
+                if values != nil {
+                    for note in values! {
+                        notes.append(Note(title: note[0], text: note[1], date: note[2]))
+                    }
                 }
-            }
+                
+                handler(notes)
+            })
             
-            handler(notes)
-        })
+        }
     }
     
     func add(index : Int, note: Note) {
