@@ -23,6 +23,8 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        self.navigationController?.setToolbarHidden(true, animated: false)
+        
         if let note = note {
             textView.text = String(note.title + note.text)
         }

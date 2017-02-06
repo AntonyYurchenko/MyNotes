@@ -1,7 +1,7 @@
 import Foundation
 import os.log
 
-class LocalStorage : Storage {
+class LocalStorage {
     
     var notes = [Note]()
     

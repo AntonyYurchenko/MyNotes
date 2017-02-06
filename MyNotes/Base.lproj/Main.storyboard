@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="nCA-1r-ypJ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="tDC-zP-iHo">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,7 +24,7 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="lT3-kX-kFp" id="0tp-jK-dwM">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="59"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="60"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZR7-Cj-Y7Q">
@@ -72,17 +72,50 @@
                             <outlet property="delegate" destination="4n7-nL-T72" id="uh5-7i-hxg"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Notes" id="ABJ-cO-QZt">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="gGg-6B-roK">
+                    <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="TwU-Mb-2Fu"/>
+                        <barButtonItem systemItem="compose" id="gGg-6B-roK">
                             <connections>
                                 <segue destination="BYZ-38-t0r" kind="show" identifier="AddNote" id="YJ8-bQ-x1c"/>
                             </connections>
                         </barButtonItem>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" title="Notes" id="ABJ-cO-QZt">
+                        <barButtonItem key="leftBarButtonItem" title="Sign In" id="0hi-Cw-jP1">
+                            <connections>
+                                <segue destination="vj1-49-S3O" kind="show" identifier="googleOAuth" id="zfq-h9-bQ2"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="signInBarBtn" destination="0hi-Cw-jP1" id="gVK-oT-4ma"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bSZ-Ig-hUu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="180" y="135"/>
+            <point key="canvasLocation" x="1119.2" y="134.48275862068968"/>
+        </scene>
+        <!--Auth View Controller-->
+        <scene sceneID="czW-xd-Huf">
+            <objects>
+                <viewController id="vj1-49-S3O" customClass="OAuthViewController" customModule="MyNotes" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Wcq-GX-QDG"/>
+                        <viewControllerLayoutGuide type="bottom" id="uVf-zs-Lcc"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ZcY-tz-Dif">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <connections>
+                        <segue destination="XQS-be-Lvt" kind="unwind" identifier="unwindToNotesTable" unwindAction="unwindToNotesTableWithSender:" id="pbX-aK-7Hh"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PWl-Oa-xhV" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="XQS-be-Lvt" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="1119" y="894"/>
         </scene>
         <!--Note View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -108,44 +141,45 @@
                         <barButtonItem key="rightBarButtonItem" systemItem="done" id="DeM-vR-CnZ">
                             <connections>
                                 <action selector="doneBarBtnTap:" destination="BYZ-38-t0r" id="6jm-BZ-X1n"/>
+                                <segue destination="Gbi-DM-QkS" kind="unwind" identifier="unwindToNotesTable" unwindAction="unwindToNotesTableWithSender:" id="nG0-3v-wRn"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="doneBarBtn" destination="DeM-vR-CnZ" id="PTU-5c-29q"/>
                         <outlet property="textView" destination="Mbj-2s-1lE" id="PIV-dN-U8j"/>
-                        <segue destination="Gbi-DM-QkS" kind="unwind" identifier="unwindToNotesTable" unwindAction="unwindToNotesTableWithSender:" id="1W2-Xk-Use"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <exit id="Gbi-DM-QkS" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="943" y="136"/>
+            <point key="canvasLocation" x="1880.8" y="135.38230884557723"/>
         </scene>
         <!--Navigation Controller-->
-        <scene sceneID="fgS-dD-kNR">
+        <scene sceneID="8pV-OR-Ivx">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="nCA-1r-ypJ" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="tDC-zP-iHo" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="K1A-aK-iXU">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="DgV-fq-PZ8">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="tintColor" red="0.66525222080000002" green="0.56598520519999995" blue="0.47211457629999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <textAttributes key="titleTextAttributes">
-                            <color key="textColor" red="0.66525222080000002" green="0.56598520519999995" blue="0.47211457629999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="jL4-4t-wPV">
+                        <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" red="0.9689070582" green="0.95228952170000003" blue="0.9213275313" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </toolbar>
                     <connections>
-                        <segue destination="4n7-nL-T72" kind="relationship" relationship="rootViewController" id="r5O-w7-ibg"/>
+                        <segue destination="4n7-nL-T72" kind="relationship" relationship="rootViewController" id="bZi-wP-CxI"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Cin-Xm-vNQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="OQn-4n-a56" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-599" y="136"/>
+            <point key="canvasLocation" x="358" y="135"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="Hsy-Sj-XNn"/>
+        <segue reference="YJ8-bQ-x1c"/>
     </inferredMetricsTieBreakers>
 </document>

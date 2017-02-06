@@ -1,24 +1,21 @@
 import UIKit
 
-class GoogleStorage : Storage {
+class GoogleStorage : LocalStorage {
     
     // MARK: Properties
     var accessToken : String?
     var spreadsheetId : String?
     let semaphore = DispatchSemaphore(value: 0)
     
-    init() {
+    override init() {
+        super.init()
         if let accessTokenOpt = UserDefaults.standard.string(forKey: "access_token") {
             accessToken = accessTokenOpt
-        } else {
-            getRefreshToken()
         }
-        
+    
         if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
             spreadsheetId = id
             print(spreadsheetId!)
-        } else {
-            createFolder()
         }
     }
     
@@ -78,7 +75,7 @@ class GoogleStorage : Storage {
         })
     }
     
-    func getRefreshToken() {
+    func getAccessToken() {
         if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
             let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
             let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
@@ -99,7 +96,7 @@ class GoogleStorage : Storage {
         }
     }
     
-    func load(handler: @escaping (_ : [Note]?) -> Void) {
+    override func load(handler: @escaping (_ : [Note]?) -> Void) {
         if spreadsheetId != nil {
             let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
             
@@ -123,7 +120,7 @@ class GoogleStorage : Storage {
         }
     }
     
-    func add(index : Int, note: Note) {
+    override func add(index : Int, note: Note) {
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A\(index + 1):C\(index + 1)?valueInputOption=USER_ENTERED"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
@@ -136,11 +133,11 @@ class GoogleStorage : Storage {
         HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in })
     }
     
-    func update(index : Int, note : Note) {
+    override func update(index : Int, note : Note) {
         add(index: index, note: note)
     }
     
-    func delete(index : Int) {
+    override func delete(index : Int) {
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!):batchUpdate"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]

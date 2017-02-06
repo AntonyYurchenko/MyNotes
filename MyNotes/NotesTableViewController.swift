@@ -1,95 +1,39 @@
 import UIKit
 import os.log
 
-func CreateStorage() -> Storage {
+func CreateStorage() -> LocalStorage {
     if UserDefaults.standard.bool(forKey: "is_google_sync") {
         return GoogleStorage()
     } else {
         return LocalStorage()
     }
 }
+
 class NotesTableViewController: UITableViewController {
     
     // MARK: Properties
-    var notes = [Note]()
-    var storage : Storage?
+    var storage = CreateStorage()
+    @IBOutlet weak var signInBarBtn: UIBarButtonItem!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if !UserDefaults.standard.bool(forKey: "HasLaunchedOnce") {
-            UserDefaults.standard.register(defaults: ["is_google_sync": true])
-        }
-        
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
-        navigationItem.leftBarButtonItem = editButtonItem
+        navigationItem.rightBarButtonItem = editButtonItem
         
-        checkSource()
-    }
-    
-    func checkSource() {
         if UserDefaults.standard.bool(forKey: "is_google_sync") {
-            if let _ = UserDefaults.standard.string(forKey: "refresh_token") {
-                loadData()
-            } else {
-                createAlertDialog()
-            }
+            //TODO remove comment (debug only)
+//            navigationItem.leftBarButtonItem = nil
         } else {
-            UserDefaults.standard.set(false, forKey: "is_google_sync")
-            loadData()
+            navigationItem.leftBarButtonItem = signInBarBtn
         }
     }
     
-    func loadData() {
-        self.storage = CreateStorage()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        self.storage?.load(handler: { notes in
-            if let loadNotes = notes {
-                print(loadNotes)
-                self.notes = loadNotes
-                
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            }
-        })
-    }
-    
-    func createAlertDialog() {
-        let alertController = UIAlertController(title: "Google SignIn",
-                                                message: "Do you want to use google sheets for store your notes?",
-                                                preferredStyle: .alert)
-        
-        let noAction = UIAlertAction(title: "No", style: .default, handler: { action in
-            UserDefaults.standard.set(false, forKey: "is_google_sync")
-            self.storage = CreateStorage()
-        })
-        let yesAction = UIAlertAction(title: "Yes", style: .default, handler: { action in
-            self.authorization()
-        })
-        
-        alertController.addAction(noAction)
-        alertController.addAction(yesAction)
-        
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    func authorization() {
-        let oauthViewController = OAuthViewController()
-        self.present(oauthViewController, animated: true, completion: nil)
-        
-        oauthViewController.accessTokenTaken.notify(queue: DispatchQueue.main) {
-            self.dismiss(animated: true, completion: nil)
-            
-            if let accessToken = UserDefaults.standard.string(forKey: "access_token") {
-                if !accessToken.isEmpty {
-                    UserDefaults.standard.set(true, forKey: "is_google_sync")
-                    
-                    self.storage = CreateStorage()
-                }
-            }
-        }
+        self.navigationController?.setToolbarHidden(false, animated: false)
     }
     
     // MARK: - Table view data source
@@ -100,7 +44,7 @@ class NotesTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return notes.count
+        return storage.notes.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -110,7 +54,7 @@ class NotesTableViewController: UITableViewController {
             fatalError("The dequeue cell is not an instance of NoteTableViewCell")
         }
         
-        let note = notes[indexPath.row]
+        let note = storage.notes[indexPath.row]
         cell.setNote(note)
         
         return cell
@@ -126,10 +70,10 @@ class NotesTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
-            notes.remove(at: indexPath.row)
+            storage.notes.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             
-            storage?.delete(index: indexPath.row )
+            storage.delete(index: indexPath.row )
         } else if editingStyle == .insert {}
     }
     
@@ -147,6 +91,9 @@ class NotesTableViewController: UITableViewController {
         
         switch(segue.identifier ?? "") {
             
+        case "googleOAuth":
+            os_log("Sign in with Google", log: OSLog.default, type: .debug)
+            
         case "AddNote":
             os_log("Adding a new note", log: OSLog.default, type: .debug)
             
@@ -163,7 +110,7 @@ class NotesTableViewController: UITableViewController {
                 fatalError("The selected cell is not being displayed by the table")
             }
             
-            let selectedNote = notes[indexPath.row]
+            let selectedNote = storage.notes[indexPath.row]
             noteEditViewController.note = selectedNote
         default:
             fatalError("Unexpected Segue Identifier; \(segue.identifier)")
@@ -172,25 +119,30 @@ class NotesTableViewController: UITableViewController {
     
     @IBAction func unwindToNotesTable(sender: UIStoryboardSegue) {
         if let sourceViewController = sender.source as? NoteViewController, let note = sourceViewController.note {
-            
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
-                let oldNote = notes[selectedIndexPath.row]
+                let oldNote = storage.notes[selectedIndexPath.row]
                 
                 //TODO check how to compare two objects by fields
                 if oldNote.title != note.title ||
                     oldNote.text != note.text ||
                     oldNote.date != note.date {
-                    notes[selectedIndexPath.row] = note
+                    storage.notes[selectedIndexPath.row] = note
                     tableView.reloadRows(at: [selectedIndexPath], with: .none)
                     
-                    storage?.update(index: selectedIndexPath.row, note: note)
+                    storage.update(index: selectedIndexPath.row, note: note)
                 }
             } else {
-                let newIndexPath = IndexPath(row: notes.count, section: 0)
-                notes.append(note)
+                let newIndexPath = IndexPath(row: storage.notes.count, section: 0)
+                storage.notes.append(note)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
                 
-                storage?.add(index: newIndexPath.row, note:  note)
+                storage.add(index: newIndexPath.row, note:  note)
+            }
+        } else if let sourceViewController = sender.source as? OAuthViewController {
+            
+            if sourceViewController.successLogIn {
+                UserDefaults.standard.set(sourceViewController.successLogIn, forKey: "is_google_sync")
+                storage = CreateStorage()
             }
         }
     }

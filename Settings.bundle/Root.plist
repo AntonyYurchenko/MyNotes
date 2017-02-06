@@ -16,11 +16,11 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Sync Google</string>
+			<string>Sync with Google</string>
 			<key>Key</key>
 			<string>is_google_sync</string>
 			<key>DefaultValue</key>
-			<true/>
+			<false/>
 		</dict>
 	</array>
 </dict>

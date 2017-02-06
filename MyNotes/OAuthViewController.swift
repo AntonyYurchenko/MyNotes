@@ -1,26 +1,20 @@
 import UIKit
+import WebKit
 
-class OAuthViewController : UIViewController, UIWebViewDelegate {
+class OAuthViewController : UIViewController, WKNavigationDelegate {
     
     // MARK: Properties
-    let webView = UIWebView()
-    let navigationBar = UINavigationBar()
+    var webView : WKWebView!
     let redirectUri = "http://127.0.0.1:9004"
     var clientId : String?
-    var accessTokenTaken = DispatchWorkItem {}
+    var successLogIn = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        webView.delegate = self
-        webView.scalesPageToFit = true
+        webView = WKWebView(frame: view.frame)
+        webView.navigationDelegate = self
         view.addSubview(webView)
-        view.addSubview(navigationBar)
-        
-        let navigationItem = UINavigationItem(title: "Google SignIn");
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(OAuthViewController.cancel))
-        navigationItem.leftBarButtonItem = cancelItem;
-        navigationBar.setItems([navigationItem], animated: false);
         
         if let id = OAuthViewController.getClientId() {
             clientId = id
@@ -30,17 +24,16 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+    
+        self.navigationController?.setToolbarHidden(true, animated: false)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
         
-        let navigationBarHeight : CGFloat = 64
-        navigationBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: navigationBarHeight)
-        navigationBar.barTintColor =  UIColor(red: 247.0/255, green: 243.0/255, blue: 235.0/255, alpha: 1.0)
-        webView.frame = CGRect(x: 0, y: navigationBarHeight, width: view.bounds.width, height: view.bounds.height)
+        performSegue(withIdentifier: "unwindToNotesTable", sender: self)
     }
-    
-    func cancel() {
-        dismiss(animated: true, completion: nil)
-    }
-    
+
     static func getClientId() -> String? {
         var clientId : String?
         let path = Bundle.main.path(forResource: "credentials", ofType: "json")
@@ -66,13 +59,12 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
         
         let authorizationEndpoint = host + endPoint + scopes + redirect_uri + response_type + client_id
         
-        UserDefaults.standard.register(defaults: ["UserAgent": "custom value"])
-
-        self.webView.loadRequest(URLRequest(url: URL(string: authorizationEndpoint)!))
+        webView.customUserAgent = "my_notes"
+        webView.load(URLRequest(url: URL(string: authorizationEndpoint)!))
     }
-    
-    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        if let url = request.url?.absoluteString {
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping ((WKNavigationActionPolicy) -> Void)) {
+        if let url = navigationAction.request.url?.absoluteString {
             if url.contains(redirectUri + "/?code=4/") {
                 let index = url.range(of: "code=")?.upperBound
                 let code = url.substring(from: index!)
@@ -81,20 +73,20 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
             }
             
             if url.contains(redirectUri + "/?error") {
-                dismiss(animated: true, completion: nil)
+                self.navigationController!.popViewController(animated: true)
             }
         }
-        return true
+        
+        decisionHandler(.allow)
     }
     
     func getAccessToken(_ code: String) {
         let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
         let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
-        let grant_type = "authorization_code"
         let params = "code=" + code +
             "&client_id=" + clientId! +
             "&redirect_uri=" + redirectUri +
-            "&grant_type=" + grant_type
+            "&grant_type=authorization_code"
         let body = params.data(using: String.Encoding.utf8)!
         
         HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
@@ -103,10 +95,10 @@ class OAuthViewController : UIViewController, UIWebViewDelegate {
             let refreshToken = json["refresh_token"] as? String
             UserDefaults.standard.set(accessToken, forKey: "access_token")
             UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
-    
-            self.accessTokenTaken.perform()
-        })
+            
+            print(accessToken)
+            self.successLogIn = true
+            self.navigationController!.popViewController(animated: true)
+        })        
     }
-    
-    
 }
