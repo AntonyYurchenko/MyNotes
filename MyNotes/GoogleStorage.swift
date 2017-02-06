@@ -8,6 +8,7 @@ class GoogleStorage : LocalStorage {
     let semaphore = DispatchSemaphore(value: 0)
     
     override init() {
+        print("GoogleStorage")
         super.init()
         if let accessTokenOpt = UserDefaults.standard.string(forKey: "access_token") {
             accessToken = accessTokenOpt
@@ -97,6 +98,8 @@ class GoogleStorage : LocalStorage {
     }
     
     override func load(handler: @escaping (_ : [Note]?) -> Void) {
+        super.load(handler: handler)
+        
         if spreadsheetId != nil {
             let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
             
@@ -121,6 +124,8 @@ class GoogleStorage : LocalStorage {
     }
     
     override func add(index : Int, note: Note) {
+        super.add(index: index, note: note)
+        
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A\(index + 1):C\(index + 1)?valueInputOption=USER_ENTERED"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
@@ -134,10 +139,14 @@ class GoogleStorage : LocalStorage {
     }
     
     override func update(index : Int, note : Note) {
+        super.update(index: index, note: note)
+        
         add(index: index, note: note)
     }
     
     override func delete(index : Int) {
+        super.delete(index: index)
+        
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!):batchUpdate"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]

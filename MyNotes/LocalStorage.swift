@@ -6,8 +6,9 @@ class LocalStorage {
     var notes = [Note]()
     
     init() {
+        print("LocalStorage")
         if let savedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: Note.ArchiveURL.path) as? [Note] {
-            notes += savedNotes
+            notes = savedNotes
         }
     }
     

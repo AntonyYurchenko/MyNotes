@@ -33,7 +33,8 @@ class NotesTableViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.setToolbarHidden(false, animated: false)
+        navigationController?.setToolbarHidden(false, animated: false)
+        navigationItem.rightBarButtonItem?.isEnabled = !storage.notes.isEmpty
     }
     
     // MARK: - Table view data source
@@ -70,11 +71,11 @@ class NotesTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
-            storage.notes.remove(at: indexPath.row)
+            storage.delete(index: indexPath.row )
             tableView.deleteRows(at: [indexPath], with: .fade)
             
-            storage.delete(index: indexPath.row )
-        } else if editingStyle == .insert {}
+            navigationItem.rightBarButtonItem?.isEnabled = !storage.notes.isEmpty
+        }
     }
     
     // Override to support conditional rearranging of the table view.
@@ -126,17 +127,13 @@ class NotesTableViewController: UITableViewController {
                 if oldNote.title != note.title ||
                     oldNote.text != note.text ||
                     oldNote.date != note.date {
-                    storage.notes[selectedIndexPath.row] = note
-                    tableView.reloadRows(at: [selectedIndexPath], with: .none)
-                    
                     storage.update(index: selectedIndexPath.row, note: note)
+                    tableView.reloadRows(at: [selectedIndexPath], with: .none)
                 }
             } else {
                 let newIndexPath = IndexPath(row: storage.notes.count, section: 0)
-                storage.notes.append(note)
-                tableView.insertRows(at: [newIndexPath], with: .automatic)
-                
                 storage.add(index: newIndexPath.row, note:  note)
+                tableView.insertRows(at: [newIndexPath], with: .automatic)
             }
         } else if let sourceViewController = sender.source as? OAuthViewController {
             
