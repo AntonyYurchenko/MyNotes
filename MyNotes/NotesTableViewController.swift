@@ -21,13 +21,6 @@ class NotesTableViewController: UITableViewController {
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.rightBarButtonItem = editButtonItem
-        
-        if UserDefaults.standard.bool(forKey: "is_google_sync") {
-            //TODO remove comment (debug only)
-//            navigationItem.leftBarButtonItem = nil
-        } else {
-            navigationItem.leftBarButtonItem = signInBarBtn
-        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,6 +28,16 @@ class NotesTableViewController: UITableViewController {
         
         navigationController?.setToolbarHidden(false, animated: false)
         navigationItem.rightBarButtonItem?.isEnabled = !storage.notes.isEmpty
+        
+        hideSignInBtn()
+    }
+    
+    func hideSignInBtn() {
+        if UserDefaults.standard.bool(forKey: "is_google_sync") {
+            navigationItem.leftBarButtonItem = nil
+        } else {
+            navigationItem.leftBarButtonItem = signInBarBtn
+        }
     }
     
     // MARK: - Table view data source
@@ -73,8 +76,6 @@ class NotesTableViewController: UITableViewController {
             
             storage.delete(index: indexPath.row )
             tableView.deleteRows(at: [indexPath], with: .fade)
-            
-            navigationItem.rightBarButtonItem?.isEnabled = !storage.notes.isEmpty
         }
     }
     

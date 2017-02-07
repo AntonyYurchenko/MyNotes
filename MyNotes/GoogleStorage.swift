@@ -13,10 +13,13 @@ class GoogleStorage : LocalStorage {
         if let accessTokenOpt = UserDefaults.standard.string(forKey: "access_token") {
             accessToken = accessTokenOpt
         }
-    
+        
         if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
             spreadsheetId = id
             print(spreadsheetId!)
+            load()
+        } else {
+            createFolder()
         }
     }
     
@@ -97,35 +100,7 @@ class GoogleStorage : LocalStorage {
         }
     }
     
-    override func load(handler: @escaping (_ : [Note]?) -> Void) {
-        super.load(handler: handler)
-        
-        if spreadsheetId != nil {
-            let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
-            
-            let headers = ["Content-Type" : "application/json",
-                           "Authorization" : "Bearer " + accessToken!]
-            var notes = [Note]()
-            
-            HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
-                
-                let json = JsonParser.parse(data: data!)
-                
-                let values = json?["values"] as? [[String]]
-                if values != nil {
-                    for note in values! {
-                        notes.append(Note(title: note[0], text: note[1], date: note[2]))
-                    }
-                }
-                
-                handler(notes)
-            })
-        }
-    }
-    
-    override func add(index : Int, note: Note) {
-        super.add(index: index, note: note)
-        
+    func addToSheet(index : Int, note : Note) {
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A\(index + 1):C\(index + 1)?valueInputOption=USER_ENTERED"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
@@ -138,10 +113,47 @@ class GoogleStorage : LocalStorage {
         HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in })
     }
     
+    func load() {
+        if spreadsheetId != nil {
+            let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
+            
+            let headers = ["Content-Type" : "application/json",
+                           "Authorization" : "Bearer " + accessToken!]
+            
+            HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
+                
+                let json = JsonParser.parse(data: data!)
+                
+                let values = json?["values"] as? [[String]]
+                if values != nil {
+                    for (index, note) in (values?.enumerated())! {
+                        if super.notes.count <= index
+                        {
+                            super.add(index: index, note: Note(title: note[0], text: note[1], date: note[2]))
+                        } else {
+                            let locatNote = super.notes[index]
+                            if locatNote.title != note[0] ||
+                                locatNote.text != note[1] ||
+                                locatNote.date != note[2] {
+                                super.notes[index] = Note(title: note[0], text: note[1], date: note[2])
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+    
+    override func add(index : Int, note: Note) {
+        super.add(index: index, note: note)
+        
+        addToSheet(index: index, note: note)
+    }
+    
     override func update(index : Int, note : Note) {
         super.update(index: index, note: note)
         
-        add(index: index, note: note)
+        addToSheet(index: index, note: note)
     }
     
     override func delete(index : Int) {

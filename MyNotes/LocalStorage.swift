@@ -11,11 +11,7 @@ class LocalStorage {
             notes = savedNotes
         }
     }
-    
-    func load(handler: @escaping (_ : [Note]?) -> Void) {
-        handler(notes)
-    }
-    
+        
     func add(index : Int, note: Note) {
         notes.append(note)
         

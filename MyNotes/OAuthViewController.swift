@@ -95,10 +95,11 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
             let refreshToken = json["refresh_token"] as? String
             UserDefaults.standard.set(accessToken, forKey: "access_token")
             UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
-            
-            print(accessToken)
+                    
             self.successLogIn = true
-            self.navigationController!.popViewController(animated: true)
+            DispatchQueue.main.async {
+                self.navigationController!.popViewController(animated: true)
+            }
         })        
     }
 }
