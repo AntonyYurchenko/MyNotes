@@ -1,12 +1,19 @@
 import UIKit
 import os.log
+import Speech
 
 class NoteViewController: UIViewController, UITextViewDelegate {
     
     // MARK: Properties
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var doneBarBtn: UIBarButtonItem!
+    @IBOutlet weak var recordBtn: UIBarButtonItem!
     var note: Note?
+    
+    let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "ru"))
+    var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    var recognitionTask: SFSpeechRecognitionTask?
+    let audioEngene = AVAudioEngine()
     
     // MARK: life-cycle methods
     override func viewDidLoad() {
@@ -18,13 +25,38 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         self.automaticallyAdjustsScrollViewInsets = false
         
         navigationItem.rightBarButtonItem = nil
+        recordBtn.isEnabled = false
+        
+        speechRecognizer?.delegate = self
+        
+        SFSpeechRecognizer.requestAuthorization({ status in
+            
+            var buttonState = false
+            
+            switch status {
+            case .authorized:
+                buttonState = true
+                print("Разрешение получено")
+            case .denied:
+                buttonState = false
+                print("Пользователь не дал разрешения на использование распознавания речи")
+            case .notDetermined:
+                buttonState = false
+                print("Распознавание речи еще не разрешено пользователем")
+            case .restricted:
+                buttonState = false
+                print("Распознавание речи не поддерживается на этом устройстве")
+            }
+            
+            DispatchQueue.main.async {
+                self.recordBtn.isEnabled = buttonState
+            }
+        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        self.navigationController?.setToolbarHidden(true, animated: false)
-        
+                
         if let note = note {
             textView.text = String(note.title + note.text)
         }
@@ -54,6 +86,17 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBAction func doneBarBtnTap(_ sender: UIBarButtonItem) {
         textView.resignFirstResponder()
         navigationItem.rightBarButtonItem = nil
+    }
+    
+    @IBAction func recordBtnTap(_ sender: UIBarButtonItem) {
+        if audioEngene.isRunning {
+            audioEngene.stop()
+            recognitionRequest?.endAudio()
+            recordBtn.tintColor = UIColor.black
+        } else {
+            startRecording()
+            recordBtn.tintColor = UIColor.red
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -103,5 +146,81 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         
         note = Note(title: title, text: text, date: date)
     }
+    
+    func startRecording() {
+        
+        if recognitionTask != nil {
+            recognitionTask?.cancel()
+            recognitionTask = nil
+        }
+        
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(AVAudioSessionCategoryRecord)
+            try audioSession.setMode(AVAudioSessionModeMeasurement)
+            try audioSession.setActive(true, with: .notifyOthersOnDeactivation)
+        } catch {
+            print("Не удалось настроить аудиосессию")
+        }
+        
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        
+        guard let inputNode = audioEngene.inputNode else {
+            fatalError("Аудио движок не имеет входного узла")
+        }
+        
+        guard let recognitionRequest = recognitionRequest else {
+            fatalError("Не могу создать экземпляр запроса")
+        }
+        
+        recognitionRequest.shouldReportPartialResults = true
+        
+        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) {
+            result, error in
+            
+            var isFinal = false
+            
+            if result != nil {
+                self.textView.text = result?.bestTranscription.formattedString
+                isFinal = (result?.isFinal)!
+            }
+        
+            if error != nil || isFinal {
+                self.audioEngene.stop()
+                inputNode.removeTap(onBus: 0)
+                
+                self.recognitionRequest = nil
+                self.recognitionTask = nil
+                
+                self.recordBtn.isEnabled = true
+            }
+        }
+        
+        let format = inputNode.outputFormat(forBus: 0)
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) {
+            buffer, _ in
+            self.recognitionRequest?.append(buffer)
+        }
+        
+        audioEngene.prepare()
+        
+        do {
+            try audioEngene.start()
+        } catch {
+            print("Не удается стартонуть движок")
+        }
+    }
 }
+
+extension NoteViewController: SFSpeechRecognizerDelegate {
+    func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
+        if available {
+            recordBtn.isEnabled = true
+        } else {
+            recordBtn.isEnabled = false
+        }
+    }
+}
+
 
