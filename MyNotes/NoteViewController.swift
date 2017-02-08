@@ -8,7 +8,6 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var doneBarBtn: UIBarButtonItem!
     @IBOutlet weak var recordBtn: UIButton!
-    let shapeLayer = CAShapeLayer()
     
     var note: Note?
     
@@ -52,19 +51,18 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.navigationController?.setToolbarHidden(true, animated: false)
+
         if let note = note {
             textView.text = String(note.title + note.text)
         }
-        
-        createCircle()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         if note == nil {
-            textView.becomeFirstResponder()
+//            textView.becomeFirstResponder()
         }
     }
     
@@ -87,19 +85,54 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
         record()
         
-        UIView.animate(withDuration: 0.3, animations: {
-            let circlePath = UIBezierPath(arcCenter: CGPoint(x: self.view.frame.maxX / 2, y: self.view.frame.maxY - 100),
-                                          radius: CGFloat(100),
-                                          startAngle: CGFloat(M_PI),
-                                          endAngle:CGFloat(0),
-                                          clockwise: true)
+        var distance = 0
+        for _ in 0...5 {
+            // create a square
+            let square = UIView()
+            createCircle(view: square)
+//            square.frame = CGRect(x: recordBtn.center.x, y: recordBtn.center.y, width: 50, height: 10)
+//            square.backgroundColor = UIColor.red
+            self.view.addSubview(square)
             
             
-            self.shapeLayer.path = circlePath.cgPath
-        }, completion: nil)
+            // for every y-value on the bezier curve
+            // add our random y offset so that each individual animation
+            // will appear at a different y-position
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: recordBtn.center.x, y: recordBtn.center.y))
+            
+//            path.addCurve(to: CGPoint(x: recordBtn.center.x, y: recordBtn.center.y - CGFloat(distance)),
+//                          controlPoint1: CGPoint(x: recordBtn.center.x, y: recordBtn.center.y - CGFloat(distance)),
+//                          controlPoint2: CGPoint(x: recordBtn.center.x, y: recordBtn.center.y - CGFloat(distance)))
+            path.addLine(to: CGPoint(x: recordBtn.center.x, y: 400 + CGFloat(distance)))
+            
+            // create the animation
+            let anim = CAKeyframeAnimation(keyPath: "position")
+            anim.path = path.cgPath
+            anim.repeatCount = Float.infinity
+            anim.duration = 2.0
+            
+            // add the animation 
+            square.layer.add(anim, forKey: "animate position along path")
+            
+            let opacity = CABasicAnimation(keyPath: "opacity")
+            opacity.toValue = 0
+            opacity.duration = 2.0
+            opacity.repeatCount = Float.infinity
+            
+            // add the animation
+            square.layer.add(opacity, forKey: "animate opacity along path")
+            distance += 30
+            
+            let positionAnimation = CABasicAnimation(keyPath:"bounds.size.width")
+            positionAnimation.toValue = 100
+            positionAnimation.duration = 3.0
+            positionAnimation.repeatCount = Float.infinity
+            square.layer.add(positionAnimation, forKey: "bounds")
+        }
     }
-    
-    @IBAction func recordBtnTouchUp(_ sender: UIButton) {
+
+    @IBAction func recordBtnTouchUp(_ sender: Any) {
         record()
     }
     
@@ -222,18 +255,18 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         }
     }
     
-    func createCircle() {
-        let circlePath = UIBezierPath(arcCenter: CGPoint(x: view.frame.maxX / 2, y: view.frame.maxY - 100),
-                                      radius: CGFloat(50),
+    func createCircle(view: UIView) {
+        let shapeLayer = CAShapeLayer()
+        let circlePath = UIBezierPath(arcCenter: CGPoint(x: view.frame.maxX / 2, y: view.frame.maxY - 70),
+                                      radius: CGFloat(30),
                                       startAngle: CGFloat(M_PI),
                                       endAngle:CGFloat(0),
                                       clockwise: true)
         
-        
         shapeLayer.path = circlePath.cgPath
         
         shapeLayer.fillColor = UIColor.clear.cgColor
-        shapeLayer.strokeColor = UIColor.blue.cgColor
+        shapeLayer.strokeColor = UIColor(red: 0, green: 205/255, blue: 1, alpha: 1).cgColor
         shapeLayer.lineWidth = 3
         
         view.layer.addSublayer(shapeLayer)

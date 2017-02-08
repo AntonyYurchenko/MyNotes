@@ -1,5 +1,5 @@
 import UIKit
-
+//TODO refactor
 class GoogleStorage : LocalStorage {
     
     // MARK: Properties
