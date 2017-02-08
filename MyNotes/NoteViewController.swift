@@ -8,6 +8,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var doneBarBtn: UIBarButtonItem!
     @IBOutlet weak var recordBtn: UIButton!
+    let shapeLayer = CAShapeLayer()
     
     var note: Note?
     
@@ -55,6 +56,8 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         if let note = note {
             textView.text = String(note.title + note.text)
         }
+        
+        createCircle()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -83,6 +86,17 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
         record()
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            let circlePath = UIBezierPath(arcCenter: CGPoint(x: self.view.frame.maxX / 2, y: self.view.frame.maxY - 100),
+                                          radius: CGFloat(100),
+                                          startAngle: CGFloat(M_PI),
+                                          endAngle:CGFloat(0),
+                                          clockwise: true)
+            
+            
+            self.shapeLayer.path = circlePath.cgPath
+        }, completion: nil)
     }
     
     @IBAction func recordBtnTouchUp(_ sender: UIButton) {
@@ -206,6 +220,23 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         } catch {
             print("Не удается стартонуть движок")
         }
+    }
+    
+    func createCircle() {
+        let circlePath = UIBezierPath(arcCenter: CGPoint(x: view.frame.maxX / 2, y: view.frame.maxY - 100),
+                                      radius: CGFloat(50),
+                                      startAngle: CGFloat(M_PI),
+                                      endAngle:CGFloat(0),
+                                      clockwise: true)
+        
+        
+        shapeLayer.path = circlePath.cgPath
+        
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.strokeColor = UIColor.blue.cgColor
+        shapeLayer.lineWidth = 3
+        
+        view.layer.addSublayer(shapeLayer)
     }
 }
 
