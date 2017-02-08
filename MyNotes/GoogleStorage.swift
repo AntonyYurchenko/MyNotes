@@ -5,7 +5,6 @@ class GoogleStorage : LocalStorage {
     // MARK: Properties
     var accessToken : String?
     var spreadsheetId : String?
-    let semaphore = DispatchSemaphore(value: 0)
     
     override init() {
         print("GoogleStorage")
@@ -16,8 +15,7 @@ class GoogleStorage : LocalStorage {
         
         if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
             spreadsheetId = id
-            print(spreadsheetId!)
-            load()
+            getAccessToken()
         } else {
             createFolder()
         }
@@ -40,7 +38,6 @@ class GoogleStorage : LocalStorage {
             
             self.createSpreadsheets(parentId: parentId!)
         })
-        _ = semaphore.wait(timeout: .distantFuture)
     }
     
     func createSpreadsheets(parentId : String) {
@@ -59,8 +56,8 @@ class GoogleStorage : LocalStorage {
             self.spreadsheetId = json?["id"] as? String
             UserDefaults.standard.set(self.spreadsheetId, forKey: "spreadsheet_id")
             print("createSpreadsheets", self.spreadsheetId!)
-            self.semaphore.signal()
-            self.updateSheetProperties()
+
+//            self.updateSheetProperties()
         })
     }
     
@@ -92,11 +89,8 @@ class GoogleStorage : LocalStorage {
                 let json = JsonParser.parse(data: data!) as! [String : AnyObject]
                 let accessToken = json["access_token"] as? String
                 UserDefaults.standard.set(accessToken, forKey: "access_token")
-                
-                self.semaphore.signal()
+                self.load()
             })
-            
-            _ = semaphore.wait(timeout: .distantFuture)
         }
     }
     
@@ -107,8 +101,6 @@ class GoogleStorage : LocalStorage {
         
         let params = ["values" : [[note.title, note.text, note.date]]]
         let body = JsonParser.parse(params: params)
-        
-        print(note.title, note.text, note.date)
         
         HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in })
     }
@@ -123,7 +115,7 @@ class GoogleStorage : LocalStorage {
             HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
                 
                 let json = JsonParser.parse(data: data!)
-                
+                //TODO how to update data?
                 let values = json?["values"] as? [[String]]
                 if values != nil {
                     for (index, note) in (values?.enumerated())! {
@@ -131,10 +123,10 @@ class GoogleStorage : LocalStorage {
                         {
                             super.add(index: index, note: Note(title: note[0], text: note[1], date: note[2]))
                         } else {
-                            let locatNote = super.notes[index]
-                            if locatNote.title != note[0] ||
-                                locatNote.text != note[1] ||
-                                locatNote.date != note[2] {
+                            let localNote = super.notes[index]
+                            let newNote = Note(title: note[0], text: note[1], date: note[2])
+                            
+                            if localNote != newNote {
                                 super.notes[index] = Note(title: note[0], text: note[1], date: note[2])
                             }
                         }

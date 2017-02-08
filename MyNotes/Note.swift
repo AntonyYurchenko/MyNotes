@@ -1,7 +1,7 @@
 import UIKit
 import os.log
 
-class Note : NSObject, NSCoding{
+class Note : NSObject, NSCoding {
     
     // MARK: Properties
     var title: String
@@ -45,5 +45,9 @@ class Note : NSObject, NSCoding{
         }
         
         self.init(title: title, text: text, date: date)
+    }
+    
+    public static func !=(lhs: Note, rhs: Note) -> Bool {
+        return lhs.title != rhs.title || lhs.text != rhs.text || lhs.date != rhs.date
     }
 }

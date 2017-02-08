@@ -7,7 +7,8 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     // MARK: Properties
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var doneBarBtn: UIBarButtonItem!
-    @IBOutlet weak var recordBtn: UIBarButtonItem!
+    @IBOutlet weak var recordBtn: UIButton!
+    
     var note: Note?
     
     let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "ru"))
@@ -22,30 +23,24 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         self.view.backgroundColor = UIColor(patternImage: background)
         
         textView.delegate = self
-        self.automaticallyAdjustsScrollViewInsets = false
-        
+        speechRecognizer?.delegate = self
         navigationItem.rightBarButtonItem = nil
         recordBtn.isEnabled = false
         
-        speechRecognizer?.delegate = self
+        self.automaticallyAdjustsScrollViewInsets = false
         
         SFSpeechRecognizer.requestAuthorization({ status in
-            
             var buttonState = false
             
             switch status {
             case .authorized:
                 buttonState = true
-                print("Разрешение получено")
             case .denied:
                 buttonState = false
-                print("Пользователь не дал разрешения на использование распознавания речи")
             case .notDetermined:
                 buttonState = false
-                print("Распознавание речи еще не разрешено пользователем")
             case .restricted:
                 buttonState = false
-                print("Распознавание речи не поддерживается на этом устройстве")
             }
             
             DispatchQueue.main.async {
@@ -56,7 +51,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-                
+        
         if let note = note {
             textView.text = String(note.title + note.text)
         }
@@ -77,26 +72,21 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         performSegue(withIdentifier: "unwindToNotesTable", sender: self)
     }
     
-    // MARK: UITextViewDelegate
     func textViewDidBeginEditing(_ textView: UITextView) {
         navigationItem.rightBarButtonItem = doneBarBtn
     }
     
-    // MARK: Bar Buttons Actions
     @IBAction func doneBarBtnTap(_ sender: UIBarButtonItem) {
         textView.resignFirstResponder()
         navigationItem.rightBarButtonItem = nil
     }
     
-    @IBAction func recordBtnTap(_ sender: UIBarButtonItem) {
-        if audioEngene.isRunning {
-            audioEngene.stop()
-            recognitionRequest?.endAudio()
-            recordBtn.tintColor = UIColor.black
-        } else {
-            startRecording()
-            recordBtn.tintColor = UIColor.red
-        }
+    @IBAction func recordBtnTouchDown(_ sender: UIButton) {
+        record()
+    }
+    
+    @IBAction func recordBtnTouchUp(_ sender: UIButton) {
+        record()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -147,8 +137,16 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         note = Note(title: title, text: text, date: date)
     }
     
+    func record() {
+        if audioEngene.isRunning {
+            audioEngene.stop()
+            recognitionRequest?.endAudio()
+        } else {
+            startRecording()
+        }
+    }
+    
     func startRecording() {
-        
         if recognitionTask != nil {
             recognitionTask?.cancel()
             recognitionTask = nil
@@ -184,15 +182,13 @@ class NoteViewController: UIViewController, UITextViewDelegate {
                 self.textView.text = result?.bestTranscription.formattedString
                 isFinal = (result?.isFinal)!
             }
-        
+            
             if error != nil || isFinal {
                 self.audioEngene.stop()
                 inputNode.removeTap(onBus: 0)
                 
                 self.recognitionRequest = nil
                 self.recognitionTask = nil
-                
-                self.recordBtn.isEnabled = true
             }
         }
         

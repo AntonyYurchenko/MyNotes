@@ -12,8 +12,8 @@ func CreateStorage() -> LocalStorage {
 class NotesTableViewController: UITableViewController {
     
     // MARK: Properties
-    var storage = CreateStorage()
     @IBOutlet weak var signInBarBtn: UIBarButtonItem!
+    var storage = CreateStorage()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,10 +25,7 @@ class NotesTableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         navigationController?.setToolbarHidden(false, animated: false)
-        navigationItem.rightBarButtonItem?.isEnabled = !storage.notes.isEmpty
-        
         hideSignInBtn()
     }
     
@@ -73,7 +70,6 @@ class NotesTableViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            
             storage.delete(index: indexPath.row )
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
@@ -124,10 +120,7 @@ class NotesTableViewController: UITableViewController {
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 let oldNote = storage.notes[selectedIndexPath.row]
                 
-                //TODO check how to compare two objects by fields
-                if oldNote.title != note.title ||
-                    oldNote.text != note.text ||
-                    oldNote.date != note.date {
+                if oldNote != note {
                     storage.update(index: selectedIndexPath.row, note: note)
                     tableView.reloadRows(at: [selectedIndexPath], with: .none)
                 }

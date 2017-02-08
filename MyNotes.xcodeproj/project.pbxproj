@@ -104,11 +104,11 @@
 			isa = PBXGroup;
 			children = (
 				0AE30E9F1E43E1CD00A71AFD /* ViewController */,
-				0AE30E9D1E43E19000A71AFD /* API */,
 				0AE30E9E1E43E1A500A71AFD /* Storage */,
 				0AB9B7BA1E028826006515E2 /* AppDelegate.swift */,
 				0AB9B7DE1E029214006515E2 /* Note.swift */,
 				0ABB9D601E42682500B48D33 /* JsonParser.swift */,
+				0A7550711E4072C3008954CD /* HttpRequest.swift */,
 				0AB9B7BE1E028826006515E2 /* Main.storyboard */,
 				0AB9B7C31E028826006515E2 /* LaunchScreen.storyboard */,
 				0AB9B7C61E028826006515E2 /* Info.plist */,
@@ -126,14 +126,6 @@
 				0AB9B7D11E028826006515E2 /* Info.plist */,
 			);
 			path = MyNotesTests;
-			sourceTree = "<group>";
-		};
-		0AE30E9D1E43E19000A71AFD /* API */ = {
-			isa = PBXGroup;
-			children = (
-				0A7550711E4072C3008954CD /* HttpRequest.swift */,
-			);
-			name = API;
 			sourceTree = "<group>";
 		};
 		0AE30E9E1E43E1A500A71AFD /* Storage */ = {
