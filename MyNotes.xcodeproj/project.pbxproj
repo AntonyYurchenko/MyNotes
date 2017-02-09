@@ -10,6 +10,7 @@
 		0A13EACC1E45F6AD00C7FC92 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0A13EACB1E45F6AC00C7FC92 /* Settings.bundle */; };
 		0A3067A51E3F5AB20091F826 /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3067A41E3F5AB20091F826 /* LocalStorage.swift */; };
 		0A3067A71E3F5AF10091F826 /* GoogleStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3067A61E3F5AF10091F826 /* GoogleStorage.swift */; };
+		0A3DB7971E4C9B2C00BB1B89 /* Pulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3DB7961E4C9B2C00BB1B89 /* Pulse.swift */; };
 		0A5A1C5A1E3E8A15001A28FC /* credentials.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A5A1C591E3E8A15001A28FC /* credentials.json */; };
 		0A7550721E4072C3008954CD /* HttpRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7550711E4072C3008954CD /* HttpRequest.swift */; };
 		0A7550741E40795D008954CD /* OAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7550731E40795D008954CD /* OAuthViewController.swift */; };
@@ -41,6 +42,7 @@
 		0A13EACB1E45F6AC00C7FC92 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		0A3067A41E3F5AB20091F826 /* LocalStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalStorage.swift; sourceTree = "<group>"; };
 		0A3067A61E3F5AF10091F826 /* GoogleStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleStorage.swift; sourceTree = "<group>"; };
+		0A3DB7961E4C9B2C00BB1B89 /* Pulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pulse.swift; sourceTree = "<group>"; };
 		0A5A1C591E3E8A15001A28FC /* credentials.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = credentials.json; sourceTree = "<group>"; };
 		0A7550711E4072C3008954CD /* HttpRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HttpRequest.swift; sourceTree = "<group>"; };
 		0A7550731E40795D008954CD /* OAuthViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuthViewController.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				0AB9B7DE1E029214006515E2 /* Note.swift */,
 				0ABB9D601E42682500B48D33 /* JsonParser.swift */,
 				0A7550711E4072C3008954CD /* HttpRequest.swift */,
+				0A3DB7961E4C9B2C00BB1B89 /* Pulse.swift */,
 				0AB9B7BE1E028826006515E2 /* Main.storyboard */,
 				0AB9B7C31E028826006515E2 /* LaunchScreen.storyboard */,
 				0AB9B7C61E028826006515E2 /* Info.plist */,
@@ -262,6 +265,7 @@
 				0A7550741E40795D008954CD /* OAuthViewController.swift in Sources */,
 				0AB9B7BB1E028826006515E2 /* AppDelegate.swift in Sources */,
 				0A7550721E4072C3008954CD /* HttpRequest.swift in Sources */,
+				0A3DB7971E4C9B2C00BB1B89 /* Pulse.swift in Sources */,
 				0A3067A51E3F5AB20091F826 /* LocalStorage.swift in Sources */,
 				0AB9B7DB1E028ECB006515E2 /* NotesTableViewController.swift in Sources */,
 				0ABB9D611E42682500B48D33 /* JsonParser.swift in Sources */,
