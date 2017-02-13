@@ -7,7 +7,6 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
     var webView : WKWebView!
     let redirectUri = "http://127.0.0.1:9004"
     var clientId : String?
-    var successLogIn = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +23,7 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-    
+        
         self.navigationController?.setToolbarHidden(true, animated: false)
     }
     
@@ -33,7 +32,7 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
         
         performSegue(withIdentifier: "unwindToNotesTable", sender: self)
     }
-
+    
     static func getClientId() -> String? {
         var clientId : String?
         let path = Bundle.main.path(forResource: "credentials", ofType: "json")
@@ -62,7 +61,7 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
         webView.customUserAgent = "my_notes"
         webView.load(URLRequest(url: URL(string: authorizationEndpoint)!))
     }
-
+    
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping ((WKNavigationActionPolicy) -> Void)) {
         if let url = navigationAction.request.url?.absoluteString {
             if url.contains(redirectUri + "/?code=4/") {
@@ -86,20 +85,20 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
         let params = "code=" + code +
             "&client_id=" + clientId! +
             "&redirect_uri=" + redirectUri +
-            "&grant_type=authorization_code"
+        "&grant_type=authorization_code"
         let body = params.data(using: String.Encoding.utf8)!
         
         HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!) as! [String : AnyObject]
-            let accessToken = json["access_token"] as? String
-            let refreshToken = json["refresh_token"] as? String
+            let json = JsonParser.parse(data: data!)
+            let accessToken = json?["access_token"] as? String
+            let refreshToken = json?["refresh_token"] as? String
             UserDefaults.standard.set(accessToken, forKey: "access_token")
             UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
-                    
-            self.successLogIn = true
+            UserDefaults.standard.set(true, forKey: "is_google_sync")
+            
             DispatchQueue.main.async {
                 self.navigationController!.popViewController(animated: true)
             }
-        })        
+        })
     }
 }

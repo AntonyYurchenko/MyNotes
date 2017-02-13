@@ -1,25 +1,19 @@
 import UIKit
 import os.log
 
-func CreateStorage() -> LocalStorage {
-    if UserDefaults.standard.bool(forKey: "is_google_sync") {
-        return GoogleStorage()
-    } else {
-        return LocalStorage()
-    }
-}
-
 class NotesTableViewController: UITableViewController {
     
     // MARK: Properties
     @IBOutlet weak var signInBarBtn: UIBarButtonItem!
-    var storage = CreateStorage()
+    var storage = LocalStorage()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.rightBarButtonItem = editButtonItem
+        
+        GoogleStorage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -127,12 +121,6 @@ class NotesTableViewController: UITableViewController {
                 let newIndexPath = IndexPath(row: storage.notes.count, section: 0)
                 storage.add(index: newIndexPath.row, note:  note)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
-            }
-        } else if let sourceViewController = sender.source as? OAuthViewController {
-            
-            if sourceViewController.successLogIn {
-                UserDefaults.standard.set(sourceViewController.successLogIn, forKey: "is_google_sync")
-                storage = CreateStorage()
             }
         }
     }
