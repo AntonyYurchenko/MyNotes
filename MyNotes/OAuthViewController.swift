@@ -96,6 +96,8 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
             UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
             UserDefaults.standard.set(true, forKey: "is_google_sync")
             
+            GoogleStorage.sharedInstance.getSpreadsheetId(isLoad: true)
+            
             DispatchQueue.main.async {
                 self.navigationController!.popViewController(animated: true)
             }

@@ -12,14 +12,17 @@ class NotesTableViewController: UITableViewController {
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.rightBarButtonItem = editButtonItem
-        
-        GoogleStorage()
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: NSNotification.Name(rawValue: "dataNotify"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setToolbarHidden(false, animated: false)
         hideSignInBtn()
+    }
+    
+    func reloadData() {
+        self.tableView.reloadData()
     }
     
     func hideSignInBtn() {

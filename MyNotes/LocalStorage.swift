@@ -6,10 +6,11 @@ class LocalStorage {
     var notes = [Note]()
     
     init() {
-        print("LocalStorage")
         if let savedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: Note.ArchiveURL.path) as? [Note] {
             notes = savedNotes
         }
+        
+        UserDefaults.standard.set(false, forKey: "notes_changed")
     }
         
     func add(index : Int, note: Note) {
@@ -32,6 +33,8 @@ class LocalStorage {
     
     private func save() {
         let isSuccessfullSave = NSKeyedArchiver.archiveRootObject(notes, toFile: Note.ArchiveURL.path)
+        
+        UserDefaults.standard.set(isSuccessfullSave, forKey: "notes_changed")
         
         if isSuccessfullSave {
             os_log("Notes successfully saved.", log: OSLog.default, type: .debug)
