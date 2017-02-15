@@ -6,13 +6,17 @@ class LocalStorage {
     var notes = [Note]()
     
     init() {
+        load()
+    }
+    
+    func load() {
         if let savedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: Note.ArchiveURL.path) as? [Note] {
             notes = savedNotes
         }
         
         UserDefaults.standard.set(false, forKey: "notes_changed")
     }
-        
+    
     func add(index : Int, note: Note) {
         notes.append(note)
         

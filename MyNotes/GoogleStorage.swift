@@ -159,7 +159,7 @@ class GoogleStorage {
                     }
                     
                     NSKeyedArchiver.archiveRootObject(notes, toFile: Note.ArchiveURL.path)
-                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "dataNotify"), object: nil)
+                    NotificationCenter.default.post(name: Notification.Name("dataNotify"), object: nil)
                 }
             })
         }
