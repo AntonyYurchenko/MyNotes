@@ -12,7 +12,7 @@ class NotesTableViewController: UITableViewController {
         let background = UIImage(named: "BackgroundTableView")!
         self.view.backgroundColor = UIColor(patternImage: background)
         navigationItem.rightBarButtonItem = editButtonItem
-        NotificationCenter.default.addObserver(self, selector: #selector(self.reloadData), name: Notification.Name("dataNotify"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.reloadData), name: Notification.Name("loadDataNotify"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {

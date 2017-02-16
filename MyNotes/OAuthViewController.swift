@@ -68,7 +68,9 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
                 let index = url.range(of: "code=")?.upperBound
                 let code = url.substring(from: index!)
                 
-                getAccessToken(code)
+                DispatchQueue(label: "com.antonybrro.mynotes").async {
+                    self.getAccessToken(code)
+                }
             }
             
             if url.contains(redirectUri + "/?error") {
@@ -88,19 +90,19 @@ class OAuthViewController : UIViewController, WKNavigationDelegate {
         "&grant_type=authorization_code"
         let body = params.data(using: String.Encoding.utf8)!
         
-        HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!)
-            let accessToken = json?["access_token"] as? String
-            let refreshToken = json?["refresh_token"] as? String
-            UserDefaults.standard.set(accessToken, forKey: "access_token")
-            UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
-            UserDefaults.standard.set(true, forKey: "is_google_sync")
-            
-            GoogleStorage.sharedInstance.getSpreadsheetId(isLoad: true)
-            
-            DispatchQueue.main.async {
-                self.navigationController!.popViewController(animated: true)
-            }
-        })
+        let (data, _, _) = HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body)
+        
+        let json = JsonParser.parse(data: data!)
+        let accessToken = json?["access_token"] as? String
+        let refreshToken = json?["refresh_token"] as? String
+        UserDefaults.standard.set(accessToken, forKey: "access_token")
+        UserDefaults.standard.set(refreshToken, forKey: "refresh_token")
+        UserDefaults.standard.set(true, forKey: "is_google_sync")
+        
+        GoogleStorage.sharedInstance.load()
+        
+        DispatchQueue.main.async {
+            self.navigationController!.popViewController(animated: true)
+        }
     }
 }

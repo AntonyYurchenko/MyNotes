@@ -2,22 +2,40 @@ import UIKit
 //TODO refactor
 class GoogleStorage {
     
-    // MARK: Properties
-    var accessToken : String?
-    var spreadsheetId : String?
-    var taskId : UIBackgroundTaskIdentifier?
+    var accessToken: String?
+    var spreadsheetId: String?
     
     static let sharedInstance : GoogleStorage = {
         let instance = GoogleStorage()
         return instance
     }()
     
-    func backupData(taskId : UIBackgroundTaskIdentifier?) {
-        self.taskId = taskId
-        getAccessToken()
+    func load() {
+        if getSpreadsheetId() {
+            loadData()
+        }
     }
     
-    func getAccessToken() {
+    func backupData(taskId : UIBackgroundTaskIdentifier?) {
+        accessToken = getAccessToken()
+        
+        if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
+            spreadsheetId = id
+            clearData()
+            postData()
+        } else if let id = createSpreadsheet() {
+            spreadsheetId = id
+            clearData()
+            postData()
+        }
+        
+        if taskId != nil {
+            UIApplication.shared.endBackgroundTask(taskId!)
+        }
+    }
+    
+    private func getAccessToken() -> String? {
+        var accessToken: String?
         if let refreshToken = UserDefaults.standard.string(forKey: "refresh_token") {
             let tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
             let headers = ["Content-Type" : "application/x-www-form-urlencoded"]
@@ -26,49 +44,55 @@ class GoogleStorage {
             "&grant_type=refresh_token"
             let body = params.data(using: String.Encoding.utf8)!
             
-            HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body, handler: { data, response, error in
-                let json = JsonParser.parse(data: data!)
-                self.accessToken = json?["access_token"] as? String
-                UserDefaults.standard.set(self.accessToken, forKey: "access_token")
-                
-                if let id = UserDefaults.standard.string(forKey: "spreadsheet_id") {
-                    self.spreadsheetId = id
-                    self.clear()
-                } else {
-                    self.getSpreadsheetId(isLoad: false)
-                }
-            })
+            let (data, _, _) = HttpRequest.request(path: tokenEndpoint, requestType: "POST", headers: headers, body: body)
+            let json = JsonParser.parse(data: data!)
+            accessToken = json?["access_token"] as? String
+            UserDefaults.standard.set(accessToken, forKey: "access_token")
         }
+        return accessToken
     }
     
-    func getSpreadsheetId(isLoad: Bool) {
+    private func getSpreadsheetId() -> Bool {
         let path = "https://www.googleapis.com/drive/v3/files"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + UserDefaults.standard.string(forKey: "access_token")!]
         
-        HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!)
-            let files = json?["files"] as! [[String : AnyObject]]
-            
-            for item in files {
-                if item["name"] as! String == "com.antonybrro.mynotes" {
-                        self.spreadsheetId = item["id"] as? String
-                        UserDefaults.standard.set(self.spreadsheetId, forKey: "spreadsheet_id")
-                    if isLoad {
-                        self.load()
-                        return
-                    } else {
-                        self.clear()
-                        return
-                    }
-                }
+        let (data, _, _) = HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil)
+        let json = JsonParser.parse(data: data!)
+        let files = json?["files"] as! [[String : AnyObject]]
+        
+        for item in files {
+            if item["name"] as! String == "com.antonybrro.mynotes" {
+                let id = item["id"] as? String
+                UserDefaults.standard.set(id, forKey: "spreadsheet_id")
+                return true
             }
-            
-            self.createFolder()
-        })
+        }
+        return false
     }
     
-    func createFolder() {
+    private func createSpreadsheet() -> String? {
+        let path = "https://www.googleapis.com/drive/v3/files"
+        let headers = ["Content-Type" : "application/json",
+                       "Authorization" : "Bearer " + accessToken!]
+        
+        let parentId = createFolder()
+        
+        let params = ["mimeType" : "application/vnd.google-apps.spreadsheet",
+                      "name" : "com.antonybrro.mynotes",
+                      "parents" : [parentId]] as [String : Any]
+        
+        let body = JsonParser.parse(params: params)
+        
+        let (data, _, _) = HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!)
+        let json = JsonParser.parse(data: data!)
+        let spreadsheetId = json?["id"] as? String
+        UserDefaults.standard.set(spreadsheetId, forKey: "spreadsheet_id")
+        
+        return spreadsheetId
+    }
+    
+    private func createFolder() -> String {
         let path = "https://www.googleapis.com/drive/v3/files"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
@@ -79,44 +103,22 @@ class GoogleStorage {
         
         let body = JsonParser.parse(params: params)
         
-        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!)
-            let parentId = json?["id"] as? String
-            self.createSpreadsheets(parentId: parentId!)
-        })
+        let (data, _, _) = HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!)
+        let json = JsonParser.parse(data: data!)
+        let parentId = json?["id"] as? String
+        
+        return parentId!
     }
     
-    func createSpreadsheets(parentId : String) {
-        let path = "https://www.googleapis.com/drive/v3/files"
-        let headers = ["Content-Type" : "application/json",
-                       "Authorization" : "Bearer " + accessToken!]
-        
-        let params = ["mimeType" : "application/vnd.google-apps.spreadsheet",
-                      "name" : "com.antonybrro.mynotes",
-                      "parents" : [parentId]] as [String : Any]
-        
-        let body = JsonParser.parse(params: params)
-        
-        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in
-            let json = JsonParser.parse(data: data!)
-            self.spreadsheetId = json?["id"] as? String
-            UserDefaults.standard.set(self.spreadsheetId, forKey: "spreadsheet_id")
-            
-            self.clear()
-        })
-    }
-    
-    func clear() {
+    private func clearData() {
         let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A1:C1000:clear"
         let headers = ["Content-Type" : "application/json",
                        "Authorization" : "Bearer " + accessToken!]
         
-        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: nil, handler: { data, response, error in
-            self.addToSheet()
-        })
+        let (_, _, _) = HttpRequest.request(path: path, requestType: "POST", headers: headers, body: nil)
     }
     
-    func addToSheet() {
+    private func postData() {
         if let savedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: Note.ArchiveURL.path) as? [Note] {
             let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A1:C\(savedNotes.count)?valueInputOption=USER_ENTERED"
             let headers = ["Content-Type" : "application/json",
@@ -131,24 +133,19 @@ class GoogleStorage {
             let body = JsonParser.parse(params: params)
             print(params)
             
-            HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!, handler: { data, response, error in
-                UserDefaults.standard.set(false, forKey: "notes_changed")
-                if self.taskId != nil {
-                    UIApplication.shared.endBackgroundTask(self.taskId!)
-                }
-            })
+            let (_, _, _) = HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!)
+            UserDefaults.standard.set(false, forKey: "notes_changed")
         }
     }
     
-    func load() {
-        if spreadsheetId != nil {
-            let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!)/values/A:C"
-            
-            let headers = ["Content-Type" : "application/json",
-                           "Authorization" : "Bearer " + UserDefaults.standard.string(forKey: "access_token")!]
-            
-            HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil, handler: { data, response, error in
+    private func loadData() {
+        if let spreadsheetId = UserDefaults.standard.string(forKey: "spreadsheet_id") {
+            if let accessToken = UserDefaults.standard.string(forKey: "access_token") {
+                let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/A:C"
+                let headers = ["Content-Type" : "application/json",
+                               "Authorization" : "Bearer " + accessToken]
                 
+                let (data, _, _) = HttpRequest.request(path: path, requestType: "GET", headers: headers, body: nil)
                 let json = JsonParser.parse(data: data!)
                 
                 let values = json?["values"] as? [[String]]
@@ -159,22 +156,9 @@ class GoogleStorage {
                     }
                     
                     NSKeyedArchiver.archiveRootObject(notes, toFile: Note.ArchiveURL.path)
-                    NotificationCenter.default.post(name: Notification.Name("dataNotify"), object: nil)
+                    NotificationCenter.default.post(name: Notification.Name("loadDataNotify"), object: nil)
                 }
-            })
+            }
         }
     }
-    
-    //    func delete(index : Int) {
-    //        let path = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId!):batchUpdate"
-    //        let headers = ["Content-Type" : "application/json",
-    //                       "Authorization" : "Bearer " + accessToken!]
-    //
-    //        let params = ["requests" : [["deleteDimension" : ["range" : ["dimension" : "ROWS",
-    //                                                                     "startIndex" : index,
-    //                                                                     "endIndex" : index + 1]]]]]
-    //        let body = JsonParser.parse(params: params)
-    //
-    //        HttpRequest.request(path: path, requestType: "POST", headers: headers, body: body!, handler: { data, response, error in })
-    //    }
 }
