@@ -51,12 +51,35 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         
         pulse.position = recordBtn.center
         self.view.layer.addSublayer(pulse)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if self.view.frame.origin.y == 0 {
+                self.view.frame.origin.y -= keyboardSize.height
+                self.recordBtn.isHidden = true
+            }
+        }
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if self.view.frame.origin.y != 0 {
+                self.view.frame.origin.y += keyboardSize.height
+                self.recordBtn.isHidden = false
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setToolbarHidden(true, animated: false)
-
+        
         if let note = note {
             textView.text = String(note.title + note.text)
         }
@@ -66,7 +89,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         super.viewDidAppear(animated)
         
         if note == nil {
-//            textView.becomeFirstResponder()
+            //            textView.becomeFirstResponder()
         }
     }
     
@@ -89,9 +112,9 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
         record()
         
-        pulse.startPulse(radius: 200, duration: 1)
+        pulse.startPulse(radius: 200, duration: 0.5)
     }
-
+    
     @IBAction func recordBtnTouchUp(_ sender: Any) {
         record()
         
@@ -167,17 +190,17 @@ class NoteViewController: UIViewController, UITextViewDelegate {
             try audioSession.setMode(AVAudioSessionModeMeasurement)
             try audioSession.setActive(true, with: .notifyOthersOnDeactivation)
         } catch {
-            print("Не удалось настроить аудиосессию")
+            print("Cant prepare audiosession")
         }
         
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         
         guard let inputNode = audioEngene.inputNode else {
-            fatalError("Аудио движок не имеет входного узла")
+            fatalError("audioEngene not have input")
         }
         
         guard let recognitionRequest = recognitionRequest else {
-            fatalError("Не могу создать экземпляр запроса")
+            fatalError("Cant create copy of request")
         }
         
         recognitionRequest.shouldReportPartialResults = true
@@ -186,13 +209,17 @@ class NoteViewController: UIViewController, UITextViewDelegate {
             result, error in
             
             var isFinal = false
-            
+            var text: String?
             if result != nil {
-                self.textView.text = result?.bestTranscription.formattedString
+                text = result?.bestTranscription.formattedString
                 isFinal = (result?.isFinal)!
             }
             
             if error != nil || isFinal {
+                if text != nil {
+                    self.textView.text.append(text!+"\n")
+                }
+                
                 self.audioEngene.stop()
                 inputNode.removeTap(onBus: 0)
                 
@@ -213,10 +240,10 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         do {
             try audioEngene.start()
         } catch {
-            print("Не удается стартонуть движок")
+            print("Cant start engine")
         }
     }
-
+    
 }
 
 extension NoteViewController: SFSpeechRecognizerDelegate {
