@@ -83,9 +83,9 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        if note == nil {
-            //            textView.becomeFirstResponder()
-//        }
+        //        if note == nil {
+        //            textView.becomeFirstResponder()
+        //        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -105,7 +105,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     }
     
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
-//        record()
+        //        record()
         
         startRecording()
         
@@ -113,7 +113,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     }
     
     @IBAction func recordBtnTouchUp(_ sender: Any) {
-//        record()
+        //        record()
         audioEngene.stop()
         recognitionRequest?.endAudio()
         
