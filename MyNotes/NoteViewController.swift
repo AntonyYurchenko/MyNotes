@@ -54,26 +54,21 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-
     }
     
     func keyboardWillShow(notification: NSNotification) {
-        
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if self.view.frame.origin.y == 0 {
-                self.view.frame.origin.y -= keyboardSize.height
-                self.recordBtn.isHidden = true
-            }
-        }
+        let info = notification.userInfo
+        let infoNSValue = info![UIKeyboardFrameBeginUserInfoKey] as! NSValue
+        let kbSize = infoNSValue.cgRectValue.size
+        let contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height, 0.0)
+        textView.contentInset = contentInsets
+        textView.scrollIndicatorInsets = contentInsets
     }
     
     func keyboardWillHide(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if self.view.frame.origin.y != 0 {
-                self.view.frame.origin.y += keyboardSize.height
-                self.recordBtn.isHidden = false
-            }
-        }
+        let contentInsets = UIEdgeInsets.zero
+        textView.contentInset = contentInsets
+        textView.scrollIndicatorInsets = contentInsets
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -88,9 +83,9 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if note == nil {
+//        if note == nil {
             //            textView.becomeFirstResponder()
-        }
+//        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -110,13 +105,17 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     }
     
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
-        record()
+//        record()
+        
+        startRecording()
         
         pulse.startPulse(radius: 200, duration: 0.5)
     }
     
     @IBAction func recordBtnTouchUp(_ sender: Any) {
-        record()
+//        record()
+        audioEngene.stop()
+        recognitionRequest?.endAudio()
         
         pulse.stopPulse()
     }
@@ -243,7 +242,6 @@ class NoteViewController: UIViewController, UITextViewDelegate {
             print("Cant start engine")
         }
     }
-    
 }
 
 extension NoteViewController: SFSpeechRecognizerDelegate {
