@@ -131,7 +131,6 @@ class GoogleStorage {
             
             let params = ["values" : notes]
             let body = JsonParser.parse(params: params)
-            print(params)
             
             let (_, _, _) = HttpRequest.request(path: path, requestType: "PUT", headers: headers, body: body!)
             UserDefaults.standard.set(false, forKey: "notes_changed")

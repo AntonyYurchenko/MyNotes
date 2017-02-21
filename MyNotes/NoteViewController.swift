@@ -10,12 +10,12 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     @IBOutlet weak var recordBtn: UIButton!
     
     var note: Note?
+    let pulse = Pulse()
     
     let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "ru"))
     var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     var recognitionTask: SFSpeechRecognitionTask?
     let audioEngene = AVAudioEngine()
-    let pulse = Pulse()
     
     // MARK: life-cycle methods
     override func viewDidLoad() {
@@ -105,17 +105,13 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     }
     
     @IBAction func recordBtnTouchDown(_ sender: UIButton) {
-        //        record()
-        
-        startRecording()
+        record()
         
         pulse.startPulse(radius: 200, duration: 0.5)
     }
     
     @IBAction func recordBtnTouchUp(_ sender: Any) {
-        //        record()
-        audioEngene.stop()
-        recognitionRequest?.endAudio()
+        record()
         
         pulse.stopPulse()
     }
@@ -169,6 +165,8 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     }
     
     func record() {
+        recordBtn.isEnabled = false
+        
         if audioEngene.isRunning {
             audioEngene.stop()
             recognitionRequest?.endAudio()
@@ -195,23 +193,22 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         
         guard let inputNode = audioEngene.inputNode else {
-            fatalError("audioEngene not have input")
+            fatalError("inputNode is nil")
         }
         
         guard let recognitionRequest = recognitionRequest else {
-            fatalError("Cant create copy of request")
+            fatalError("recognitionRequest is nil")
         }
         
         recognitionRequest.shouldReportPartialResults = true
         
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) {
-            result, error in
-            
+        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
             var isFinal = false
             var text: String?
-            if result != nil {
-                text = result?.bestTranscription.formattedString
-                isFinal = (result?.isFinal)!
+            
+            if let resultString = result {
+                text = resultString.bestTranscription.formattedString
+                isFinal = resultString.isFinal
             }
             
             if error != nil || isFinal {
@@ -224,12 +221,12 @@ class NoteViewController: UIViewController, UITextViewDelegate {
                 
                 self.recognitionRequest = nil
                 self.recognitionTask = nil
+                
+                self.recordBtn.isEnabled = true
             }
         }
         
-        let format = inputNode.outputFormat(forBus: 0)
-        
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) {
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: inputNode.outputFormat(forBus: 0)) {
             buffer, _ in
             self.recognitionRequest?.append(buffer)
         }
