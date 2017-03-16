@@ -49,9 +49,6 @@ class NoteViewController: UIViewController, UITextViewDelegate {
             }
         })
         
-        pulse.position = recordBtn.center
-        self.view.layer.addSublayer(pulse)
-        
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
@@ -83,9 +80,12 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        //        if note == nil {
-        //            textView.becomeFirstResponder()
-        //        }
+        if note == nil {
+            textView.becomeFirstResponder()
+        }
+        
+        pulse.position = recordBtn.center
+        self.view.layer.addSublayer(pulse)
     }
     
     override func viewWillDisappear(_ animated: Bool) {

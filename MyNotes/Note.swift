@@ -32,15 +32,12 @@ class Note : NSObject, NSCoding {
     
     required convenience init?(coder aDecoder: NSCoder) {
         guard let title = aDecoder.decodeObject(forKey: PropertyKey.title) as? String else {
-            os_log("Unable to decode the name for a Note object.", log: OSLog.default, type: .debug)
             return nil
         }
         guard let text = aDecoder.decodeObject(forKey: PropertyKey.text) as? String else {
-            os_log("Unable to decode the name for a Note object.", log: OSLog.default, type: .debug)
             return nil
         }
         guard let date = aDecoder.decodeObject(forKey: PropertyKey.date) as? String else {
-            os_log("Unable to decode the name for a Note object.", log: OSLog.default, type: .debug)
             return nil
         }
         
